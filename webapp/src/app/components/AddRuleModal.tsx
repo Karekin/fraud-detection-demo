@@ -43,6 +43,7 @@ const sampleRules: {
     limit: 20000000,
     limitOperatorType: "GREATER",
     windowMinutes: 43200,
+    // tslint:disable-next-line:object-literal-sort-keys
     ruleState: "ACTIVE",
   },
    2: {
@@ -52,6 +53,7 @@ const sampleRules: {
      limit: 10000000,
      limitOperatorType: "GREATER_EQUAL",
      windowMinutes: 1440,
+     // tslint:disable-next-line:object-literal-sort-keys
      ruleState: "ACTIVE",
    },
   3: {
@@ -61,6 +63,7 @@ const sampleRules: {
     limit: 100,
     limitOperatorType: "GREATER_EQUAL",
     windowMinutes: 1440,
+    // tslint:disable-next-line:object-literal-sort-keys
     ruleState: "ACTIVE",
   },
 
