@@ -1,20 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ververica.demo.backend.services;
 
 import com.ververica.demo.backend.datasource.Transaction;
@@ -27,28 +10,43 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-@Service
-@Slf4j
+/**
+ * Kafka 交易推送服务，实现了 Consumer 接口，用于接收交易数据并将其发送到 Kafka。
+ */
+@Service // 标注这是一个Spring服务组件
+@Slf4j // 使用Lombok提供的日志功能
 public class KafkaTransactionsPusher implements Consumer<Transaction> {
 
-    private KafkaTemplate<String, Object> kafkaTemplate;
-    private Transaction lastTransaction;
+    private final KafkaTemplate<String, Object> kafkaTemplate; // Kafka模板，用于发送数据到Kafka
+    private Transaction lastTransaction; // 用于存储最后一次处理的交易数据
 
     @Value("${kafka.topic.transactions}")
-    private String topic;
+    private String topic; // 从配置文件中读取的 Kafka 主题名称
 
+    /**
+     * 构造函数，自动注入 KafkaTemplate。
+     * @param kafkaTemplateForJson 用于发送 JSON 格式消息的 KafkaTemplate 实例。
+     */
     @Autowired
     public KafkaTransactionsPusher(KafkaTemplate<String, Object> kafkaTemplateForJson) {
         this.kafkaTemplate = kafkaTemplateForJson;
     }
 
+    /**
+     * 实现 Consumer 接口的 accept 方法，用于处理交易数据。
+     * @param transaction 接收到的交易数据
+     */
     @Override
     public void accept(Transaction transaction) {
-        lastTransaction = transaction;
-        log.debug("{}", transaction);
-        kafkaTemplate.send(topic, transaction);
+        lastTransaction = transaction; // 更新最后一次处理的交易数据
+        log.debug("Pushing transaction to Kafka: {}", transaction); // 记录日志
+        kafkaTemplate.send(topic, transaction); // 将交易数据发送到配置的 Kafka 主题
     }
 
+    /**
+     * 获取最后一次处理的交易数据。
+     * @return 最后一次处理的交易对象
+     */
     public Transaction getLastTransaction() {
         return lastTransaction;
     }

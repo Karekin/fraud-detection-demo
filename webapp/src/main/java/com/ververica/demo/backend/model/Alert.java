@@ -1,33 +1,21 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ververica.demo.backend.model;
 
 import com.ververica.demo.backend.datasource.Transaction;
+
 import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Data
-@AllArgsConstructor
+/**
+ * 警报模型，用于表示触发了某个规则的警报详细信息。
+ */
+@Data // Lombok注解，自动生成所有属性的getter和setter方法，以及toString、equals和hashCode方法。
+@AllArgsConstructor // Lombok注解，自动生成包含所有字段的构造函数。
 public class Alert {
-  private Integer ruleId;
-  private String rulePayload;
+    private Integer ruleId; // 规则ID，标识触发警报的规则。
+    private String rulePayload; // 规则载荷，包含规则的具体内容。
 
-  Transaction triggeringEvent;
-  BigDecimal triggeringValue;
+    Transaction triggeringEvent; // 触发此警报的交易事件。
+    BigDecimal triggeringValue; // 触发此警报的数值，可能基于交易金额或其他计算得出。
 }
