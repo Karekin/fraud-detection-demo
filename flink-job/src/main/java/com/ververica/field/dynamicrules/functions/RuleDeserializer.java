@@ -29,25 +29,25 @@ import org.apache.flink.util.Collector;
 @Slf4j
 public class RuleDeserializer extends RichFlatMapFunction<String, Rule> {
 
-  private RuleParser ruleParser;
+    private RuleParser ruleParser;
 
-  @Override
-  public void open(Configuration parameters) throws Exception {
-    super.open(parameters);
-    ruleParser = new RuleParser();
-  }
-
-  @Override
-  public void flatMap(String value, Collector<Rule> out) throws Exception {
-    log.info("{}", value);
-    try {
-      Rule rule = ruleParser.fromString(value);
-      if (rule.getRuleState() != RuleState.CONTROL && rule.getRuleId() == null) {
-        throw new NullPointerException("ruleId cannot be null: " + rule.toString());
-      }
-      out.collect(rule);
-    } catch (Exception e) {
-      log.warn("Failed parsing rule, dropping it:", e);
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        super.open(parameters);
+        ruleParser = new RuleParser();
     }
-  }
+
+    @Override
+    public void flatMap(String value, Collector<Rule> out) throws Exception {
+        log.info("{}", value);
+        try {
+            Rule rule = ruleParser.fromString(value);
+            if (rule.getRuleState() != RuleState.CONTROL && rule.getRuleId() == null) {
+                throw new NullPointerException("ruleId cannot be null: " + rule.toString());
+            }
+            out.collect(rule);
+        } catch (Exception e) {
+            log.warn("Failed parsing rule, dropping it:", e);
+        }
+    }
 }

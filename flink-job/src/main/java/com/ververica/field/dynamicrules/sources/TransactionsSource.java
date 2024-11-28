@@ -29,7 +29,9 @@ import com.ververica.field.dynamicrules.functions.JsonDeserializer;
 import com.ververica.field.dynamicrules.functions.JsonGeneratorWrapper;
 import com.ververica.field.dynamicrules.functions.TimeStamper;
 import com.ververica.field.dynamicrules.functions.TransactionsGenerator;
+
 import java.util.Properties;
+
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -40,65 +42,65 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class TransactionsSource {
 
-  public static DataStreamSource<String> initTransactionsSource(
-      Config config, StreamExecutionEnvironment env) {
+    public static DataStreamSource<String> initTransactionsSource(
+            Config config, StreamExecutionEnvironment env) {
 
-    String sourceType = config.get(TRANSACTIONS_SOURCE);
-    TransactionsSource.Type transactionsSourceType =
-        TransactionsSource.Type.valueOf(sourceType.toUpperCase());
-    int transactionsPerSecond = config.get(RECORDS_PER_SECOND);
-    DataStreamSource<String> dataStreamSource;
+        String sourceType = config.get(TRANSACTIONS_SOURCE);
+        TransactionsSource.Type transactionsSourceType =
+                TransactionsSource.Type.valueOf(sourceType.toUpperCase());
+        int transactionsPerSecond = config.get(RECORDS_PER_SECOND);
+        DataStreamSource<String> dataStreamSource;
 
-    switch (transactionsSourceType) {
-      case KAFKA:
-        Properties kafkaProps = KafkaUtils.initConsumerProperties(config);
-        String transactionsTopic = config.get(DATA_TOPIC);
+        switch (transactionsSourceType) {
+            case KAFKA:
+                Properties kafkaProps = KafkaUtils.initConsumerProperties(config);
+                String transactionsTopic = config.get(DATA_TOPIC);
 
-        // NOTE: Idiomatically, watermarks should be assigned here, but this done later
-        // because of the mix of the new Source (Kafka) and SourceFunction-based interfaces.
-        // TODO: refactor when FLIP-238 is added
+                // NOTE: Idiomatically, watermarks should be assigned here, but this done later
+                // because of the mix of the new Source (Kafka) and SourceFunction-based interfaces.
+                // TODO: refactor when FLIP-238 is added
 
-        KafkaSource<String> kafkaSource =
-            KafkaSource.<String>builder()
-                .setProperties(kafkaProps)
-                .setTopics(transactionsTopic)
-                .setStartingOffsets(OffsetsInitializer.latest())
-                .setValueOnlyDeserializer(new SimpleStringSchema())
-                .build();
+                KafkaSource<String> kafkaSource =
+                        KafkaSource.<String>builder()
+                                .setProperties(kafkaProps)
+                                .setTopics(transactionsTopic)
+                                .setStartingOffsets(OffsetsInitializer.latest())
+                                .setValueOnlyDeserializer(new SimpleStringSchema())
+                                .build();
 
-        dataStreamSource =
-            env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Rules Kafka Source");
-        break;
-      default:
-        JsonGeneratorWrapper<Transaction> generatorSource =
-            new JsonGeneratorWrapper<>(new TransactionsGenerator(transactionsPerSecond));
-        dataStreamSource = env.addSource(generatorSource);
-    }
-    return dataStreamSource;
-  }
-
-  public static DataStream<Transaction> stringsStreamToTransactions(
-      DataStream<String> transactionStrings) {
-    return transactionStrings
-        .flatMap(new JsonDeserializer<Transaction>(Transaction.class))
-        .returns(Transaction.class)
-        .flatMap(new TimeStamper<Transaction>())
-        .returns(Transaction.class)
-        .name("Transactions Deserialization");
-  }
-
-  public enum Type {
-    GENERATOR("Transactions Source (generated locally)"),
-    KAFKA("Transactions Source (Kafka)");
-
-    private String name;
-
-    Type(String name) {
-      this.name = name;
+                dataStreamSource =
+                        env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Rules Kafka Source");
+                break;
+            default:
+                JsonGeneratorWrapper<Transaction> generatorSource =
+                        new JsonGeneratorWrapper<>(new TransactionsGenerator(transactionsPerSecond));
+                dataStreamSource = env.addSource(generatorSource);
+        }
+        return dataStreamSource;
     }
 
-    public String getName() {
-      return name;
+    public static DataStream<Transaction> stringsStreamToTransactions(
+            DataStream<String> transactionStrings) {
+        return transactionStrings
+                .flatMap(new JsonDeserializer<Transaction>(Transaction.class))
+                .returns(Transaction.class)
+                .flatMap(new TimeStamper<Transaction>())
+                .returns(Transaction.class)
+                .name("Transactions Deserialization");
     }
-  }
+
+    public enum Type {
+        GENERATOR("Transactions Source (generated locally)"),
+        KAFKA("Transactions Source (Kafka)");
+
+        private String name;
+
+        Type(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

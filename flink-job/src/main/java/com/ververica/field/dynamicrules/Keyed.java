@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Keyed<IN, KEY, ID> {
-  private IN wrapped;
-  private KEY key;
-  private ID id;
+    private IN wrapped;
+    private KEY key;
+    private ID id;
 }
