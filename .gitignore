@@ -11,3 +11,4 @@ span/
 .DS_Store
 */.DS_Store
 *rebel.xml
+zookeeper-log/
