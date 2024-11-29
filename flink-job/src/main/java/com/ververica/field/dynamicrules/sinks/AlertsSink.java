@@ -25,19 +25,68 @@ import static com.ververica.field.config.Parameters.GCP_PUBSUB_ALERTS_SUBSCRIPTI
 
 import com.ververica.field.config.Config;
 import com.ververica.field.dynamicrules.Alert;
+import com.ververica.field.dynamicrules.AlertSql;
 import com.ververica.field.dynamicrules.KafkaUtils;
 import com.ververica.field.dynamicrules.functions.JsonSerializer;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.gcp.pubsub.PubSubSink;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
-import org.apache.flink.streaming.connectors.kafka.internal.FlinkKafkaProducer;
+//import org.apache.flink.streaming.connectors.kafka.internal.FlinkKafkaProducer;
 
 public class AlertsSink {
+
+    public static DataStreamSink<String> addAlertsSink(Config config, DataStream<String> stream)
+            throws IOException {
+
+        String sinkType = config.get(ALERTS_SINK);
+        AlertsSink.Type alertsSinkType = AlertsSink.Type.valueOf(sinkType.toUpperCase());
+        DataStreamSink<String> dataStreamSink;
+
+        switch (alertsSinkType) {
+            case KAFKA:
+                Properties kafkaProps = KafkaUtils.initProducerProperties(config);
+                String alertsTopic = config.get(ALERTS_TOPIC);
+
+                KafkaSink<String> kafkaSink =
+                        KafkaSink.<String>builder()
+                                .setKafkaProducerConfig(kafkaProps)
+                                .setRecordSerializer(
+                                        KafkaRecordSerializationSchema.builder()
+                                                .setTopic(alertsTopic)
+                                                .setValueSerializationSchema(new SimpleStringSchema())
+                                                .build())
+                                .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                                .build();
+                dataStreamSink = stream.sinkTo(kafkaSink);
+                break;
+            case PUBSUB:
+                PubSubSink<String> pubSubSinkFunction =
+                        PubSubSink.<String>newBuilder()
+                                .withSerializationSchema(new SimpleStringSchema())
+                                .withProjectName(config.get(GCP_PROJECT_NAME))
+                                .withTopicName(config.get(GCP_PUBSUB_ALERTS_SUBSCRIPTION))
+                                .build();
+                dataStreamSink = stream.addSink(pubSubSinkFunction);
+                break;
+            case STDOUT:
+                dataStreamSink = stream.addSink(new PrintSinkFunction<>(true));
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Source \"" + alertsSinkType + "\" unknown. Known values are:" + Type.values());
+        }
+        return dataStreamSink;
+    }
 
     public static SinkFunction<String> createAlertsSink(Config config) throws IOException {
 
@@ -48,7 +97,7 @@ public class AlertsSink {
             case KAFKA:
                 Properties kafkaProps = KafkaUtils.initProducerProperties(config);
                 String alertsTopic = config.get(ALERTS_TOPIC);
-                return new FlinkKafkaProducer011<String>(alertsTopic, new SimpleStringSchema(), kafkaProps);
+                return new FlinkKafkaProducer<>(alertsTopic, new SimpleStringSchema(), kafkaProps);
             case PUBSUB:
                 return PubSubSink.<String>newBuilder()
                         .withSerializationSchema(new SimpleStringSchema())
@@ -65,6 +114,9 @@ public class AlertsSink {
 
     public static DataStream<String> alertsStreamToJson(DataStream<Alert> alerts) {
         return alerts.flatMap(new JsonSerializer<>(Alert.class)).name("Alerts Deserialization");
+    }
+    public static DataStream<String> alertSqlsStreamToJson(DataStream<AlertSql> alerts) {
+        return alerts.flatMap(new JsonSerializer<>(AlertSql.class)).name("Alerts Deserialization");
     }
 
     public enum Type {

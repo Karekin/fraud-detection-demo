@@ -35,7 +35,7 @@ plugins {
 
 ext {
     javaVersion = '1.8'
-    flinkVersion = '1.15.1'
+    flinkVersion = '1.15.4'
     scalaBinaryVersion = '2.12'
     slf4jVersion = '1.7.7'
     log4jVersion = '2.10.0'
@@ -66,7 +66,7 @@ wrapper {
 // declare where to find the dependencies of your project
 repositories {
     mavenCentral()
-    maven { url "https://repository.apache.org/content/repositories/snapshots/" }
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
 }
 
 // NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
@@ -128,16 +128,21 @@ dependencies {
     flinkShadowJar group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.51.0'
 
     // Flink CEP (Complex Event Processing)
-    flinkShadowJar "org.apache.flink:flink-cep_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-cep:${flinkVersion}"
 
     // Flink Table API & SQL
-    flinkShadowJar "org.apache.flink:flink-table-planner_${scalaBinaryVersion}:${flinkVersion}"
-    flinkShadowJar "org.apache.flink:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
-    flinkShadowJar "org.apache.flink:flink-table-api-scala-bridge_${scalaBinaryVersion}:${flinkVersion}"
+//    flinkShadowJar "org.apache.flink:flink-table-planner-loader:${flinkVersion}"
+//    flinkShadowJar "org.apache.flink:flink-table-api-java-bridge:${flinkVersion}"
+//    implementation "org.apache.flink:flink-table-runtime:${flinkVersion}"
+//    implementation 'org.apache.flink:flink-table':${flinkVersion}
+//    implementation 'org.apache.flink:flink-sql-client':${flinkVersion}
+    implementation "org.apache.flink:flink-table:${flinkVersion}"
+    implementation "org.apache.flink:flink-sql-client:${flinkVersion}"
 
     // 确保所有相关依赖都包括
-    flinkShadowJar "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-clients:${flinkVersion}"
     flinkShadowJar "org.apache.flink:flink-core:${flinkVersion}"
+
 }
 
 // make compileOnly dependencies available for tests:

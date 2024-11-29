@@ -28,7 +28,7 @@ import com.ververica.field.dynamicrules.functions.TransactionEventsGenerator;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 
 import java.util.Properties;
 
@@ -48,8 +48,8 @@ public class TransactionEventsSource {
       case KAFKA:
         Properties kafkaProps = KafkaUtils.initConsumerProperties(config);
         String transactionsTopic = config.get(DATA_TOPIC);
-        FlinkKafkaConsumer011<String> kafkaConsumer =
-            new FlinkKafkaConsumer011<>(transactionsTopic, new SimpleStringSchema(), kafkaProps);
+        FlinkKafkaConsumer<String> kafkaConsumer =
+            new FlinkKafkaConsumer<>(transactionsTopic, new SimpleStringSchema(), kafkaProps);
         kafkaConsumer.setStartFromLatest();
         return kafkaConsumer;
       default:

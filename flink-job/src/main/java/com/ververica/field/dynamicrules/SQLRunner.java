@@ -21,7 +21,7 @@ package com.ververica.field.dynamicrules;
 import com.ververica.field.config.Config;
 import com.ververica.field.dynamicrules.converters.StringConverter;
 import com.ververica.field.dynamicrules.converters.TransactionStringConverter;
-import com.ververica.field.dynamicrules.functions.BroadcastEmbeddedFlinkFunction;
+import com.ververica.field.dynamicrules.functions.DynamicSqlCepFunction;
 import com.ververica.field.dynamicrules.sinks.AlertsSink;
 import com.ververica.field.dynamicrules.sources.SqlsSource;
 import com.ververica.field.dynamicrules.sources.TransactionEventsSource;
@@ -54,148 +54,150 @@ import static com.ververica.field.config.Parameters.*;
 @Slf4j
 public class SQLRunner {
 
-  private Config config;
+    private Config config;
 
-  SQLRunner(Config config) {
-    this.config = config;
-  }
-
-  public void run() throws Exception {
-
-    SqlsSource.Type sqlsSourceType = getSqlsSourceType();
-
-    boolean isLocal = config.get(LOCAL_EXECUTION);
-    boolean enableCheckpoints = config.get(ENABLE_CHECKPOINTS);
-    int checkpointsInterval = config.get(CHECKPOINT_INTERVAL);
-    int minPauseBtwnCheckpoints = config.get(CHECKPOINT_INTERVAL);
-
-    // Environment setup
-    StreamExecutionEnvironment env = configureStreamExecutionEnvironment(sqlsSourceType, isLocal);
-
-    if (enableCheckpoints) {
-      env.enableCheckpointing(checkpointsInterval);
-      env.getCheckpointConfig().setMinPauseBetweenCheckpoints(minPauseBtwnCheckpoints);
+    SQLRunner(Config config) {
+        this.config = config;
     }
 
-    // Streams setup
-    DataStream<TransactionEvent> transactions = getTransactionsStream(env).keyBy("payeeId");
-    AssignerWithPeriodicWatermarks assigner =
-        new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS));
+    public void run() throws Exception {
 
+        SqlsSource.Type sqlsSourceType = getSqlsSourceType();
 
-    BroadcastEmbeddedFlinkFunction<String, TransactionEvent> embeddedFlinkFunction =
-        new BroadcastEmbeddedFlinkFunction<String, TransactionEvent>(
-            TypeInformation.of(new TypeHint<TransactionEvent>() {}),
-            Arrays.asList(
-                "transactionId",
-                "eventTime",
-                "payeeId",
-                "beneficiaryId",
-                "paymentAmount",
-                "paymentType",
-                "ingestionTimestamp"),
-            TransactionStringConverter.class,
-            assigner);
+        boolean isLocal = config.get(LOCAL_EXECUTION);
+        boolean enableCheckpoints = config.get(ENABLE_CHECKPOINTS);
+        int checkpointsInterval = config.get(CHECKPOINT_INTERVAL);
+        int minPauseBtwnCheckpoints = config.get(CHECKPOINT_INTERVAL);
 
-    DataStream<SqlEvent> sqls = getSqlsUpdateStream(env);
+        // Environment setup
+        StreamExecutionEnvironment env = configureStreamExecutionEnvironment(sqlsSourceType, isLocal);
 
-    MapStateDescriptor<String, SqlEvent> ruleStateDescriptor =
-        new MapStateDescriptor<>(
-            "RulesBroadcastState",
-            BasicTypeInfo.STRING_TYPE_INFO,
-            TypeInformation.of(new TypeHint<SqlEvent>() {}));
+        if (enableCheckpoints) {
+            env.enableCheckpointing(checkpointsInterval);
+            env.getCheckpointConfig().setMinPauseBetweenCheckpoints(minPauseBtwnCheckpoints);
+        }
 
-    BroadcastStream<SqlEvent> sqlBroadcastStream = sqls.broadcast(ruleStateDescriptor);
+        // Streams setup
+        DataStream<TransactionEvent> transactions = getTransactionsStream(env).keyBy("payeeId");
+        AssignerWithPeriodicWatermarks assigner =
+                new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS));
 
-    DataStream<Tuple4<String, Boolean, Row, Long>> output =
-        transactions.connect(sqlBroadcastStream).process(embeddedFlinkFunction).setParallelism(1);
+        // 暂时用 DynamicSqlCepFunction 替换 BroadcastEmbeddedFlinkFunction
+        DynamicSqlCepFunction<String, TransactionEvent> embeddedFlinkFunction =
+                new DynamicSqlCepFunction<String, TransactionEvent>(
+                        TypeInformation.of(new TypeHint<TransactionEvent>() {
+                        }),
+                        Arrays.asList(
+                                "transactionId",
+                                "eventTime",
+                                "payeeId",
+                                "beneficiaryId",
+                                "paymentAmount",
+                                "paymentType",
+                                "ingestionTimestamp"),
+                        TransactionStringConverter.class,
+                        assigner);
 
-    output.print().name("Alert STDOUT Sink");
+        DataStream<SqlEvent> sqls = getSqlsUpdateStream(env);
 
-    DataStream<String> alertsJson = AlertsSink.alertsStreamToJson(output.map(Alert::fromTuple));
+        MapStateDescriptor<String, SqlEvent> ruleStateDescriptor =
+                new MapStateDescriptor<>(
+                        "RulesBroadcastState",
+                        BasicTypeInfo.STRING_TYPE_INFO,
+                        TypeInformation.of(new TypeHint<SqlEvent>() {
+                        }));
 
-    alertsJson
-            .addSink(AlertsSink.createAlertsSink(config))
-            .setParallelism(1)
-            .name("Alerts JSON Sink");
+        BroadcastStream<SqlEvent> sqlBroadcastStream = sqls.broadcast(ruleStateDescriptor);
 
-    env.execute();
-  }
+        DataStream<Tuple4<String, Boolean, Row, Long>> output =
+                transactions.connect(sqlBroadcastStream).process(embeddedFlinkFunction).setParallelism(1);
 
-  private DataStream<TransactionEvent> getTransactionsStream(StreamExecutionEnvironment env) {
-    // Data stream setup
-    SourceFunction<String> transactionSource =
-        TransactionEventsSource.createTransactionEventsSource(config);
-    int sourceParallelism = config.get(SOURCE_PARALLELISM);
-    DataStream<String> transactionsStringsStream =
-        env.addSource(transactionSource)
-            .name("Transactions Source")
-            .setParallelism(sourceParallelism);
-    DataStream<TransactionEvent> transactionsStream =
-        TransactionEventsSource.stringsStreamToTransactionEvents(transactionsStringsStream);
-    return transactionsStream.assignTimestampsAndWatermarks(
-        new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS)));
-  }
+        output.print().name("Alert STDOUT Sink");
 
-  private DataStream<SqlEvent> getSqlsUpdateStream(StreamExecutionEnvironment env)
-      throws IOException {
+        DataStream<String> alertsJson = AlertsSink.alertSqlsStreamToJson(output.map(AlertSql::fromTuple));
 
-    SqlsSource.Type sqlsSourceEnumType = getSqlsSourceType();
+        alertsJson
+                .addSink(AlertsSink.createAlertsSink(config))
+                .setParallelism(1)
+                .name("Alerts JSON Sink");
 
-    SourceFunction<String> sqlsSource = SqlsSource.createSqlsSource(config);
-    DataStream<String> sqlsStrings =
-        env.addSource(sqlsSource).name(sqlsSourceEnumType.getName()).setParallelism(1);
-    return SqlsSource.stringsStreamToSqls(sqlsStrings);
-  }
-
-  private SqlsSource.Type getSqlsSourceType() {
-    String sqlsSource = config.get(SQLS_SOURCE);
-    return SqlsSource.Type.valueOf(sqlsSource.toUpperCase());
-  }
-
-  private StreamExecutionEnvironment configureStreamExecutionEnvironment(
-      SqlsSource.Type sqlsSourceEnumType, boolean isLocal) {
-    Configuration flinkConfig = new Configuration();
-    flinkConfig.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
-
-    StreamExecutionEnvironment env =
-        isLocal
-            ? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(flinkConfig)
-            : StreamExecutionEnvironment.getExecutionEnvironment();
-
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-    env.getCheckpointConfig().setCheckpointInterval(config.get(CHECKPOINT_INTERVAL));
-    env.getCheckpointConfig()
-        .setMinPauseBetweenCheckpoints(config.get(MIN_PAUSE_BETWEEN_CHECKPOINTS));
-
-    configureRestartStrategy(env, sqlsSourceEnumType);
-    return env;
-  }
-
-  private void configureRestartStrategy(
-      StreamExecutionEnvironment env, SqlsSource.Type rulesSourceEnumType) {
-    switch (rulesSourceEnumType) {
-      case SOCKET:
-        env.setRestartStrategy(
-            RestartStrategies.fixedDelayRestart(
-                10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
-        break;
-      case KAFKA:
-        // Default - unlimited restart strategy.
-        //        env.setRestartStrategy(RestartStrategies.noRestart());
-    }
-  }
-
-  private static class SimpleBoundedOutOfOrdernessTimestampExtractor<T extends TransactionEvent>
-      extends BoundedOutOfOrdernessTimestampExtractor<T> {
-
-    public SimpleBoundedOutOfOrdernessTimestampExtractor(int outOfOrderdnessMillis) {
-      super(Time.of(outOfOrderdnessMillis, TimeUnit.MILLISECONDS));
+        env.execute();
     }
 
-    @Override
-    public long extractTimestamp(T element) {
-      return element.getEventTime();
+    private DataStream<TransactionEvent> getTransactionsStream(StreamExecutionEnvironment env) {
+        // Data stream setup
+        SourceFunction<String> transactionSource =
+                TransactionEventsSource.createTransactionEventsSource(config);
+        int sourceParallelism = config.get(SOURCE_PARALLELISM);
+        DataStream<String> transactionsStringsStream =
+                env.addSource(transactionSource)
+                        .name("Transactions Source")
+                        .setParallelism(sourceParallelism);
+        DataStream<TransactionEvent> transactionsStream =
+                TransactionEventsSource.stringsStreamToTransactionEvents(transactionsStringsStream);
+        return transactionsStream.assignTimestampsAndWatermarks(
+                new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS)));
     }
-  }
+
+    private DataStream<SqlEvent> getSqlsUpdateStream(StreamExecutionEnvironment env)
+            throws IOException {
+
+        SqlsSource.Type sqlsSourceEnumType = getSqlsSourceType();
+
+        SourceFunction<String> sqlsSource = SqlsSource.createSqlsSource(config);
+        DataStream<String> sqlsStrings =
+                env.addSource(sqlsSource).name(sqlsSourceEnumType.getName()).setParallelism(1);
+        return SqlsSource.stringsStreamToSqls(sqlsStrings);
+    }
+
+    private SqlsSource.Type getSqlsSourceType() {
+        String sqlsSource = config.get(SQLS_SOURCE);
+        return SqlsSource.Type.valueOf(sqlsSource.toUpperCase());
+    }
+
+    private StreamExecutionEnvironment configureStreamExecutionEnvironment(
+            SqlsSource.Type sqlsSourceEnumType, boolean isLocal) {
+        Configuration flinkConfig = new Configuration();
+        flinkConfig.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
+
+        StreamExecutionEnvironment env =
+                isLocal
+                        ? StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(flinkConfig)
+                        : StreamExecutionEnvironment.getExecutionEnvironment();
+
+        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.getCheckpointConfig().setCheckpointInterval(config.get(CHECKPOINT_INTERVAL));
+        env.getCheckpointConfig()
+                .setMinPauseBetweenCheckpoints(config.get(MIN_PAUSE_BETWEEN_CHECKPOINTS));
+
+        configureRestartStrategy(env, sqlsSourceEnumType);
+        return env;
+    }
+
+    private void configureRestartStrategy(
+            StreamExecutionEnvironment env, SqlsSource.Type rulesSourceEnumType) {
+        switch (rulesSourceEnumType) {
+            case SOCKET:
+                env.setRestartStrategy(
+                        RestartStrategies.fixedDelayRestart(
+                                10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+                break;
+            case KAFKA:
+                // Default - unlimited restart strategy.
+                //        env.setRestartStrategy(RestartStrategies.noRestart());
+        }
+    }
+
+    private static class SimpleBoundedOutOfOrdernessTimestampExtractor<T extends TransactionEvent>
+            extends BoundedOutOfOrdernessTimestampExtractor<T> {
+
+        public SimpleBoundedOutOfOrdernessTimestampExtractor(int outOfOrderdnessMillis) {
+            super(Time.of(outOfOrderdnessMillis, TimeUnit.MILLISECONDS));
+        }
+
+        @Override
+        public long extractTimestamp(T element) {
+            return element.getEventTime();
+        }
+    }
 }
