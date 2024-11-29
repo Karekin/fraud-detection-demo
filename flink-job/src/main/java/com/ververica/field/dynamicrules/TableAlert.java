@@ -27,14 +27,14 @@ import org.apache.flink.types.Row;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlertSql {
+public class TableAlert {
     private String sql;
     private Boolean isAdded;
     private Object[] response;
     private Long timestamp;
-    public static AlertSql fromTuple(Tuple4<String, Boolean, Row, Long> el) {
+    public static TableAlert fromTuple(Tuple4<String, Boolean, Row, Long> el) {
         Object[] resp = new Object[el.f2.getArity()];
         for (int i = 0; i < resp.length; i++) resp[i] = el.f2.getField(i);
-        return new AlertSql(el.f0, el.f1, resp, el.f3);
+        return new TableAlert(el.f0, el.f1, resp, el.f3);
     }
 }

@@ -17,7 +17,7 @@
 
 package com.ververica.demo.backend.services;
 
-import com.ververica.demo.backend.model.Alert;
+import com.ververica.demo.backend.model.StreamAlert;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class KafkaAlertsPusher implements Consumer<Alert> {
+public class KafkaAlertsPusher implements Consumer<StreamAlert> {
 
   private KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -40,7 +40,7 @@ public class KafkaAlertsPusher implements Consumer<Alert> {
   }
 
   @Override
-  public void accept(Alert alert) {
+  public void accept(StreamAlert alert) {
     log.info("{}", alert);
     kafkaTemplate.send(topic, alert);
   }

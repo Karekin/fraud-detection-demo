@@ -112,9 +112,9 @@ public class SQLRunner {
         DataStream<Tuple4<String, Boolean, Row, Long>> output =
                 transactions.connect(sqlBroadcastStream).process(embeddedFlinkFunction).setParallelism(1);
 
-        output.print().name("Alert STDOUT Sink");
+        output.print().name("StreamAlert STDOUT Sink");
 
-        DataStream<String> alertsJson = AlertsSink.alertSqlsStreamToJson(output.map(AlertSql::fromTuple));
+        DataStream<String> alertsJson = AlertsSink.alertSqlsStreamToJson(output.map(TableAlert::fromTuple));
 
         alertsJson
                 .addSink(AlertsSink.createAlertsSink(config))

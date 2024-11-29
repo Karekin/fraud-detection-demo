@@ -24,8 +24,8 @@ import static com.ververica.field.config.Parameters.GCP_PROJECT_NAME;
 import static com.ververica.field.config.Parameters.GCP_PUBSUB_ALERTS_SUBSCRIPTION;
 
 import com.ververica.field.config.Config;
-import com.ververica.field.dynamicrules.Alert;
-import com.ververica.field.dynamicrules.AlertSql;
+import com.ververica.field.dynamicrules.StreamAlert;
+import com.ververica.field.dynamicrules.TableAlert;
 import com.ververica.field.dynamicrules.KafkaUtils;
 import com.ververica.field.dynamicrules.functions.JsonSerializer;
 import java.io.IOException;
@@ -112,11 +112,11 @@ public class AlertsSink {
         }
     }
 
-    public static DataStream<String> alertsStreamToJson(DataStream<Alert> alerts) {
-        return alerts.flatMap(new JsonSerializer<>(Alert.class)).name("Alerts Deserialization");
+    public static DataStream<String> alertsStreamToJson(DataStream<StreamAlert> alerts) {
+        return alerts.flatMap(new JsonSerializer<>(StreamAlert.class)).name("Alerts Deserialization");
     }
-    public static DataStream<String> alertSqlsStreamToJson(DataStream<AlertSql> alerts) {
-        return alerts.flatMap(new JsonSerializer<>(AlertSql.class)).name("Alerts Deserialization");
+    public static DataStream<String> alertSqlsStreamToJson(DataStream<TableAlert> alerts) {
+        return alerts.flatMap(new JsonSerializer<>(TableAlert.class)).name("Alerts Deserialization");
     }
 
     public enum Type {

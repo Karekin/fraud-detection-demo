@@ -21,7 +21,7 @@ package com.ververica.field.dynamicrules.functions;
 import static com.ververica.field.dynamicrules.functions.ProcessingUtils.addToStateValuesSet;
 import static com.ververica.field.dynamicrules.functions.ProcessingUtils.handleRuleBroadcast;
 
-import com.ververica.field.dynamicrules.Alert;
+import com.ververica.field.dynamicrules.StreamAlert;
 import com.ververica.field.dynamicrules.FieldsExtractor;
 import com.ververica.field.dynamicrules.Keyed;
 import com.ververica.field.dynamicrules.Rule;
@@ -51,7 +51,7 @@ import org.apache.flink.util.Collector;
 @Slf4j
 public class DynamicAlertFunction
     extends KeyedBroadcastProcessFunction<
-        String, Keyed<Transaction, String, Integer>, Rule, Alert> {
+        String, Keyed<Transaction, String, Integer>, Rule, StreamAlert> {
 
   private static final String COUNT = "COUNT_FLINK";
   private static final String COUNT_WITH_RESET = "COUNT_WITH_RESET_FLINK";
@@ -79,7 +79,7 @@ public class DynamicAlertFunction
 
   @Override
   public void processElement(
-      Keyed<Transaction, String, Integer> value, ReadOnlyContext ctx, Collector<Alert> out)
+      Keyed<Transaction, String, Integer> value, ReadOnlyContext ctx, Collector<StreamAlert> out)
       throws Exception {
 
     long currentEventTime = value.getWrapped().getEventTime();
@@ -128,14 +128,14 @@ public class DynamicAlertFunction
         }
         alertMeter.markEvent();
         out.collect(
-            new Alert<>(
+            new StreamAlert<>(
                 rule.getRuleId(), rule, value.getKey(), value.getWrapped(), aggregateResult));
       }
     }
   }
 
   @Override
-  public void processBroadcastElement(Rule rule, Context ctx, Collector<Alert> out)
+  public void processBroadcastElement(Rule rule, Context ctx, Collector<StreamAlert> out)
       throws Exception {
     log.info("{}", rule);
     BroadcastState<Integer, Rule> broadcastState =
@@ -223,7 +223,7 @@ public class DynamicAlertFunction
   }
 
   @Override
-  public void onTimer(final long timestamp, final OnTimerContext ctx, final Collector<Alert> out)
+  public void onTimer(final long timestamp, final OnTimerContext ctx, final Collector<StreamAlert> out)
       throws Exception {
 
     Rule widestWindowRule = ctx.getBroadcastState(Descriptors.rulesDescriptor).get(WIDEST_RULE_KEY);

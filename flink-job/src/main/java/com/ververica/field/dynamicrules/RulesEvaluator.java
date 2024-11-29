@@ -87,7 +87,7 @@ public class RulesEvaluator {
     BroadcastStream<Rule> rulesStream = rulesUpdateStream.broadcast(Descriptors.rulesDescriptor);
 
     // Processing pipeline setup
-    DataStream<Alert> alerts =
+    DataStream<StreamAlert> alerts =
         transactions
             .connect(rulesStream)
             .process(new DynamicKeyFunction())
@@ -100,15 +100,15 @@ public class RulesEvaluator {
             .name("Dynamic Rule Evaluation Function");
 
     DataStream<String> allRuleEvaluations =
-        ((SingleOutputStreamOperator<Alert>) alerts).getSideOutput(Descriptors.demoSinkTag);
+        ((SingleOutputStreamOperator<StreamAlert>) alerts).getSideOutput(Descriptors.demoSinkTag);
 
     DataStream<Long> latency =
-        ((SingleOutputStreamOperator<Alert>) alerts).getSideOutput(Descriptors.latencySinkTag);
+        ((SingleOutputStreamOperator<StreamAlert>) alerts).getSideOutput(Descriptors.latencySinkTag);
 
     DataStream<Rule> currentRules =
-        ((SingleOutputStreamOperator<Alert>) alerts).getSideOutput(Descriptors.currentRulesSinkTag);
+        ((SingleOutputStreamOperator<StreamAlert>) alerts).getSideOutput(Descriptors.currentRulesSinkTag);
 
-    alerts.print().name("Alert STDOUT Sink");
+    alerts.print().name("StreamAlert STDOUT Sink");
     allRuleEvaluations.print().setParallelism(1).name("Rule Evaluation Sink");
 
     DataStream<String> alertsJson = AlertsSink.alertsStreamToJson(alerts);

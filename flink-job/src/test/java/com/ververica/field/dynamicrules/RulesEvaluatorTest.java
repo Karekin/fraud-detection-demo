@@ -103,7 +103,7 @@ public class RulesEvaluatorTest {
     Keyed<Transaction, String, Integer> keyed3 = new Keyed<>(event3, "CRD", 1);
 
     try (BroadcastStreamKeyedOperatorTestHarness<
-            String, Keyed<Transaction, String, Integer>, Rule, Alert>
+            String, Keyed<Transaction, String, Integer>, Rule, StreamAlert>
         testHarness =
             BroadcastStreamKeyedOperatorTestHarness.getInitializedTestHarness(
                 new DynamicAlertFunction(),
@@ -119,10 +119,10 @@ public class RulesEvaluatorTest {
       testHarness.processElement1(new StreamRecord<>(keyed3, 17L));
 
       ConcurrentLinkedQueue<Object> expectedOutput = new ConcurrentLinkedQueue<>();
-      Alert<Transaction, BigDecimal> alert1 =
-          new Alert<>(rule1.getRuleId(), rule1, "CSH", event1, BigDecimal.valueOf(22));
-      Alert<Transaction, BigDecimal> alert2 =
-          new Alert<>(rule1.getRuleId(), rule1, "CRD", event3, BigDecimal.valueOf(21));
+      StreamAlert<Transaction, BigDecimal> alert1 =
+          new StreamAlert<>(rule1.getRuleId(), rule1, "CSH", event1, BigDecimal.valueOf(22));
+      StreamAlert<Transaction, BigDecimal> alert2 =
+          new StreamAlert<>(rule1.getRuleId(), rule1, "CRD", event3, BigDecimal.valueOf(21));
 
       expectedOutput.add(new StreamRecord<>(alert1, 15L));
       expectedOutput.add(new StreamRecord<>(alert2, 17L));
@@ -146,7 +146,7 @@ public class RulesEvaluatorTest {
     Keyed<Transaction, String, Integer> keyed2 = new Keyed<>(event2, "CSH", 1);
 
     try (BroadcastStreamKeyedOperatorTestHarness<
-            String, Keyed<Transaction, String, Integer>, Rule, Alert>
+            String, Keyed<Transaction, String, Integer>, Rule, StreamAlert>
         testHarness =
             BroadcastStreamKeyedOperatorTestHarness.getInitializedTestHarness(
                 new DynamicAlertFunction(),
@@ -161,8 +161,8 @@ public class RulesEvaluatorTest {
       testHarness.processElement1(new StreamRecord<>(keyed2, 16L));
 
       ConcurrentLinkedQueue<Object> expectedOutput = new ConcurrentLinkedQueue<>();
-      Alert<Transaction, BigDecimal> alert1 =
-          new Alert<>(rule1.getRuleId(), rule1, "CSH", event2, new BigDecimal(21));
+      StreamAlert<Transaction, BigDecimal> alert1 =
+          new StreamAlert<>(rule1.getRuleId(), rule1, "CSH", event2, new BigDecimal(21));
 
       expectedOutput.add(new StreamRecord<>(alert1, 16L));
 
@@ -191,7 +191,7 @@ public class RulesEvaluatorTest {
     Keyed<Transaction, String, Integer> keyed4 = new Keyed<>(event4, "CSH", 1);
 
     try (BroadcastStreamKeyedOperatorTestHarness<
-            String, Keyed<Transaction, String, Integer>, Rule, Alert>
+            String, Keyed<Transaction, String, Integer>, Rule, StreamAlert>
         testHarness =
             BroadcastStreamKeyedOperatorTestHarness.getInitializedTestHarness(
                 new DynamicAlertFunction(),
@@ -219,8 +219,8 @@ public class RulesEvaluatorTest {
       testHarness.processElement1(toStreamRecord(keyed3));
 
       ConcurrentLinkedQueue<Object> expectedOutput = new ConcurrentLinkedQueue<>();
-      Alert<Transaction, BigDecimal> alert1 =
-          new Alert<>(rule1.getRuleId(), rule1, "CSH", event3, new BigDecimal(11));
+      StreamAlert<Transaction, BigDecimal> alert1 =
+          new StreamAlert<>(rule1.getRuleId(), rule1, "CSH", event3, new BigDecimal(11));
 
       expectedOutput.add(new StreamRecord<>(alert1, event3.getEventTime()));
 

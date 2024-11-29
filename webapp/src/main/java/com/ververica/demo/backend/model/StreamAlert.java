@@ -24,7 +24,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Alert {
+public class StreamAlert {
   private Integer ruleId;
   private String rulePayload;
 

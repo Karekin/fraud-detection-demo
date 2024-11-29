@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ververica.demo.backend.datasource.Transaction;
 import com.ververica.demo.backend.entities.Rule;
 import com.ververica.demo.backend.exceptions.RuleNotFoundException;
-import com.ververica.demo.backend.model.Alert;
+import com.ververica.demo.backend.model.StreamAlert;
 import com.ververica.demo.backend.repositories.RuleRepository;
 import com.ververica.demo.backend.services.KafkaTransactionsPusher;
 import java.math.BigDecimal;
@@ -58,13 +58,13 @@ public class AlertsController {
   ObjectMapper mapper = new ObjectMapper();
 
   @GetMapping("/rules/{id}/alert")
-  Alert mockAlert(@PathVariable Integer id) throws JsonProcessingException {
+  StreamAlert mockAlert(@PathVariable Integer id) throws JsonProcessingException {
     Rule rule = repository.findById(id).orElseThrow(() -> new RuleNotFoundException(id));
     Transaction triggeringEvent = transactionsPusher.getLastTransaction();
     String violatedRule = rule.getRulePayload();
     BigDecimal triggeringValue = triggeringEvent.getPaymentAmount().multiply(new BigDecimal(10));
 
-    Alert alert = new Alert(rule.getId(), violatedRule, triggeringEvent, triggeringValue);
+    StreamAlert alert = new StreamAlert(rule.getId(), violatedRule, triggeringEvent, triggeringValue);
 
     String result = mapper.writeValueAsString(alert);
 
