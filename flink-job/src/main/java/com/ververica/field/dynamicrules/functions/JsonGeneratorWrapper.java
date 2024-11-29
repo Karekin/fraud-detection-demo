@@ -19,15 +19,14 @@
 package com.ververica.field.dynamicrules.functions;
 
 import com.ververica.field.sources.BaseGenerator;
+import java.util.SplittableRandom;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.SplittableRandom;
-
 public class JsonGeneratorWrapper<T> extends BaseGenerator<String> {
 
-  private static final ObjectMapper objectMapper = new ObjectMapper();
   private BaseGenerator<T> wrappedGenerator;
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public JsonGeneratorWrapper(BaseGenerator<T> wrappedGenerator) {
     this.wrappedGenerator = wrappedGenerator;

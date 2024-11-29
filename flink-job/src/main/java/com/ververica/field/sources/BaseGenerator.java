@@ -18,6 +18,9 @@
 
 package com.ververica.field.sources;
 
+import static org.apache.flink.util.Preconditions.checkArgument;
+
+import java.util.SplittableRandom;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
@@ -26,10 +29,6 @@ import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
-
-import java.util.SplittableRandom;
-
-import static org.apache.flink.util.Preconditions.checkArgument;
 
 /** A simple random data generator with data rate throttling logic. */
 public abstract class BaseGenerator<T> extends RichParallelSourceFunction<T>

@@ -65,6 +65,10 @@ public class TransactionsGenerator implements Runnable {
         .build();
   }
 
+  public Transaction generateOne() {
+    return randomEvent(new SplittableRandom());
+  }
+
   private static String paymentType(long id) {
     int name = (int) (id % 2);
     switch (name) {

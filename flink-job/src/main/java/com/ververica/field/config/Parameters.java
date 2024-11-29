@@ -28,33 +28,33 @@ public class Parameters {
 
   private final ParameterTool tool;
 
-//  public Parameters(ParameterTool tool) {
-//    this.tool = tool;
-//  }
+  public Parameters(ParameterTool tool) {
+    this.tool = tool;
+  }
 
-//  <T> T getOrDefault(Param<T> param) {
-//    if (!tool.has(param.getName())) {
-//      return param.getDefaultValue();
-//    }
-//    Object value;
-//    if (param.getType() == Integer.class) {
-//      value = tool.getInt(param.getName());
-//    } else if (param.getType() == Long.class) {
-//      value = tool.getLong(param.getName());
-//    } else if (param.getType() == Double.class) {
-//      value = tool.getDouble(param.getName());
-//    } else if (param.getType() == Boolean.class) {
-//      value = tool.getBoolean(param.getName());
-//    } else {
-//      value = tool.get(param.getName());
-//    }
-//    return param.getType().cast(value);
-//  }
-//
-//  public static Parameters fromArgs(String[] args) {
-//    ParameterTool tool = ParameterTool.fromArgs(args);
-//    return new Parameters(tool);
-//  }
+  <T> T getOrDefault(Param<T> param) {
+    if (!tool.has(param.getName())) {
+      return param.getDefaultValue();
+    }
+    Object value;
+    if (param.getType() == Integer.class) {
+      value = tool.getInt(param.getName());
+    } else if (param.getType() == Long.class) {
+      value = tool.getLong(param.getName());
+    } else if (param.getType() == Double.class) {
+      value = tool.getDouble(param.getName());
+    } else if (param.getType() == Boolean.class) {
+      value = tool.getBoolean(param.getName());
+    } else {
+      value = tool.get(param.getName());
+    }
+    return param.getType().cast(value);
+  }
+
+  public static Parameters fromArgs(String[] args) {
+    ParameterTool tool = ParameterTool.fromArgs(args);
+    return new Parameters(tool);
+  }
 
   // Kafka:
   public static final Param<String> KAFKA_HOST = Param.string("kafka-host", "localhost");
@@ -82,6 +82,7 @@ public class Parameters {
       Param.string("pubsub-rules-export", "current-rules-demo");
 
   // Socket
+//  public static final Param<Integer> SOCKET_PORT = Param.integer("pubsub-rules-export", 9999);
   public static final Param<Integer> SOCKET_PORT = Param.integer("socket-port", 9999);
   // General:
   //    source/sink types: kafka / pubsub / socket
@@ -144,32 +145,4 @@ public class Parameters {
       Arrays.asList(LOCAL_EXECUTION, ENABLE_CHECKPOINTS);
 
   //  List<Param> list = Arrays.asList(new String[]{"foo", "bar"});
-
-  public Parameters(ParameterTool tool) {
-    this.tool = tool;
-  }
-
-  public static Parameters fromArgs(String[] args) {
-    ParameterTool tool = ParameterTool.fromArgs(args);
-    return new Parameters(tool);
-  }
-
-  <T> T getOrDefault(Param<T> param) {
-    if (!tool.has(param.getName())) {
-      return param.getDefaultValue();
-    }
-    Object value;
-    if (param.getType() == Integer.class) {
-      value = tool.getInt(param.getName());
-    } else if (param.getType() == Long.class) {
-      value = tool.getLong(param.getName());
-    } else if (param.getType() == Double.class) {
-      value = tool.getDouble(param.getName());
-    } else if (param.getType() == Boolean.class) {
-      value = tool.getBoolean(param.getName());
-    } else {
-      value = tool.get(param.getName());
-    }
-    return param.getType().cast(value);
-  }
 }

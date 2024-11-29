@@ -8,6 +8,7 @@ transactionsRateDisplayLimit: 50
 kafka:
   topic:
     transactions: livetransactions
+    rules: rules
     sqls: sqls
     alerts: alerts
     latency: latency

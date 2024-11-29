@@ -27,13 +27,13 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RulesBootstrapper implements ApplicationRunner {
+public class RulesTableBootstrapper implements ApplicationRunner {
 
   private SqlRepository sqlRepository;
   private FlinkSqlService flinkSqlService;
 
   @Autowired
-  public RulesBootstrapper(SqlRepository userRepository, FlinkSqlService flinkSqlService) {
+  public RulesTableBootstrapper(SqlRepository userRepository, FlinkSqlService flinkSqlService) {
     this.sqlRepository = userRepository;
     this.flinkSqlService = flinkSqlService;
   }

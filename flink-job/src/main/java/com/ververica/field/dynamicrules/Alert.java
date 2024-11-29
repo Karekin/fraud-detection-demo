@@ -26,10 +26,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Alert<Event, Value> {
-    private Integer ruleId;
-    private Rule violatedRule;
-    private String key;
+  private Integer ruleId;
+  private Rule violatedRule;
+  private String key;
 
-    private Event triggeringEvent;
-    private Value triggeringValue;
+  private Event triggeringEvent;
+  private Value triggeringValue;
 }
