@@ -1,32 +1,21 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ververica.field.dynamicrules;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+// 使用Lombok注解自动生成构造函数、getter、setter等方法
+@Data // 自动生成getter、setter、toString、equals、hashCode方法
+@NoArgsConstructor // 自动生成无参构造函数
+@AllArgsConstructor // 自动生成全参构造函数
 public class Keyed<IN, KEY, ID> {
+
+    // 被包装的输入对象
     private IN wrapped;
+
+    // 用于标识的键值
     private KEY key;
+
+    // 唯一标识符
     private ID id;
 }

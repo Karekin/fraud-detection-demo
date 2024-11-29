@@ -27,6 +27,8 @@ import org.apache.flink.util.Collector;
  * - 基于广播规则对输入数据进行动态分区。
  * - 使用 Flink 的广播状态机制动态更新规则。
  * - 处理规则的控制命令（如删除所有规则）。
+ *
+ * Flink 可以根据动态变化的规则对输入数据进行精细化的处理，适用于需要实时规则更新和灵活数据分区的场景。
  */
 @Slf4j
 public class DynamicKeyFunction

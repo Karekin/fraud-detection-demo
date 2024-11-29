@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ververica.field.config;
 
 import java.util.Arrays;
@@ -23,18 +5,37 @@ import java.util.List;
 
 import org.apache.flink.api.java.utils.ParameterTool;
 
+/**
+ * Parameters 类用于存储和管理系统中的配置参数。
+ * 该类通过参数名称读取配置信息，并提供默认值的支持。
+ */
 public class Parameters {
 
     private final ParameterTool tool;
 
+    /**
+     * 构造函数，接收一个 ParameterTool 对象用于解析配置文件。
+     *
+     * @param tool 用于解析命令行参数或配置文件的 ParameterTool 实例
+     */
     public Parameters(ParameterTool tool) {
         this.tool = tool;
     }
 
+    /**
+     * 根据传入的参数获取对应的值。如果参数不存在，则返回默认值。
+     *
+     * @param param 要获取的参数
+     * @param <T>   参数类型
+     * @return 参数的值
+     */
     <T> T getOrDefault(Param<T> param) {
+        // 如果没有提供该参数，返回默认值
         if (!tool.has(param.getName())) {
             return param.getDefaultValue();
         }
+
+        // 根据参数类型从命令行工具中获取值
         Object value;
         if (param.getType() == Integer.class) {
             value = tool.getInt(param.getName());
@@ -47,15 +48,21 @@ public class Parameters {
         } else {
             value = tool.get(param.getName());
         }
-        return param.getType().cast(value);
+        return param.getType().cast(value);  // 将获取的值转换为指定类型并返回
     }
 
+    /**
+     * 从命令行参数中解析出 Parameters 对象。
+     *
+     * @param args 命令行参数
+     * @return 解析后的 Parameters 对象
+     */
     public static Parameters fromArgs(String[] args) {
-        ParameterTool tool = ParameterTool.fromArgs(args);
+        ParameterTool tool = ParameterTool.fromArgs(args);  // 使用 ParameterTool 解析命令行参数
         return new Parameters(tool);
     }
 
-    // Kafka:
+    // Kafka 配置参数
     public static final Param<String> KAFKA_HOST = Param.string("kafka-host", "localhost");
     public static final Param<Integer> KAFKA_PORT = Param.integer("kafka-port", 9092);
 
@@ -68,7 +75,7 @@ public class Parameters {
 
     public static final Param<String> OFFSET = Param.string("offset", "latest");
 
-    // GCP PubSub:
+    // GCP PubSub 配置参数
     public static final Param<String> GCP_PROJECT_NAME = Param.string("gcp-project", "da-fe-212612");
     public static final Param<String> GCP_PUBSUB_RULES_SUBSCRIPTION =
             Param.string("pubsub-rules", "rules-demo");
@@ -79,11 +86,11 @@ public class Parameters {
     public static final Param<String> GCP_PUBSUB_RULES_EXPORT_SUBSCRIPTION =
             Param.string("pubsub-rules-export", "current-rules-demo");
 
-    // Socket
+    // Socket 配置参数
     public static final Param<Integer> SOCKET_PORT = Param.integer("pubsub-rules-export", 9999);
 
-    // General:
-    //    source/sink types: kafka / pubsub / socket
+    // 通用配置参数：
+    //    数据源/数据接收类型: kafka / pubsub / socket
     public static final Param<String> RULES_SOURCE = Param.string("rules-source", "SOCKET");
     public static final Param<String> TRANSACTIONS_SOURCE = Param.string("data-source", "GENERATOR");
     public static final Param<String> ALERTS_SINK = Param.string("alerts-sink", "STDOUT");
@@ -104,8 +111,7 @@ public class Parameters {
             Param.integer("min-pause-btwn-checkpoints", 10000);
     public static final Param<Integer> OUT_OF_ORDERNESS = Param.integer("out-of-orderdness", 500);
 
-    //  List<Param> list = Arrays.asList(new String[]{"foo", "bar"});
-
+    // 参数列表，分别存储 String、Integer 和 Boolean 类型的参数
     public static final List<Param<String>> STRING_PARAMS =
             Arrays.asList(
                     KAFKA_HOST,

@@ -1,84 +1,120 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ververica.field.dynamicrules;
 
 import com.ververica.field.dynamicrules.Rule.AggregatorFunctionType;
 import com.ververica.field.dynamicrules.Rule.LimitOperatorType;
 import com.ververica.field.dynamicrules.Rule.RuleState;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * 规则解析器类，负责将规则的字符串表示解析成Rule对象。
+ * 支持两种解析方式：JSON格式解析和普通的CSV格式解析。
+ */
 public class RuleParser {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+    // 用于解析JSON格式的ObjectMapper
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public Rule fromString(String line) throws IOException {
-    if (line.length() > 0 && '{' == line.charAt(0)) {
-      return parseJson(line);
-    } else {
-      return parsePlain(line);
+    /**
+     * 根据规则的字符串形式解析为Rule对象。
+     * 如果是JSON格式，使用JSON解析；否则，使用普通的CSV格式解析。
+     *
+     * @param line 规则的字符串表示
+     * @return 解析后的Rule对象
+     * @throws IOException 如果解析失败，则抛出IOException
+     */
+    public Rule fromString(String line) throws IOException {
+        // 如果字符串的首字符为'{', 则认为是JSON格式
+        if (line.length() > 0 && '{' == line.charAt(0)) {
+            return parseJson(line);
+        } else {
+            // 否则认为是普通的CSV格式
+            return parsePlain(line);
+        }
     }
-  }
 
-  private Rule parseJson(String ruleString) throws IOException {
-    return objectMapper.readValue(ruleString, Rule.class);
-  }
-
-  private static Rule parsePlain(String ruleString) throws IOException {
-    List<String> tokens = Arrays.asList(ruleString.split(","));
-    if (tokens.size() != 9) {
-      throw new IOException("Invalid rule (wrong number of tokens): " + ruleString);
+    /**
+     * 解析JSON格式的规则字符串为Rule对象。
+     *
+     * @param ruleString JSON格式的规则字符串
+     * @return 解析后的Rule对象
+     * @throws IOException 如果JSON格式解析失败，则抛出IOException
+     */
+    private Rule parseJson(String ruleString) throws IOException {
+        // 使用ObjectMapper将JSON字符串转换为Rule对象
+        return objectMapper.readValue(ruleString, Rule.class);
     }
 
-    Iterator<String> iter = tokens.iterator();
-    Rule rule = new Rule();
+    /**
+     * 解析普通CSV格式的规则字符串为Rule对象。
+     * 规则字符串应该是用逗号分隔的9个字段。
+     *
+     * @param ruleString 普通格式的规则字符串
+     * @return 解析后的Rule对象
+     * @throws IOException 如果解析失败（如字段数不对等），则抛出IOException
+     */
+    private static Rule parsePlain(String ruleString) throws IOException {
+        // 将规则字符串按逗号分隔成多个字段
+        List<String> tokens = Arrays.asList(ruleString.split(","));
+        // 校验字段数是否正确，应该是9个字段
+        if (tokens.size() != 9) {
+            throw new IOException("无效的规则（字段数量错误）： " + ruleString);
+        }
 
-    rule.setRuleId(Integer.parseInt(stripBrackets(iter.next())));
-    rule.setRuleState(RuleState.valueOf(stripBrackets(iter.next()).toUpperCase()));
-    rule.setGroupingKeyNames(getNames(iter.next()));
-    rule.setUnique(getNames(iter.next()));
-    rule.setAggregateFieldName(stripBrackets(iter.next()));
-    rule.setAggregatorFunctionType(
-        AggregatorFunctionType.valueOf(stripBrackets(iter.next()).toUpperCase()));
-    rule.setLimitOperatorType(LimitOperatorType.fromString(stripBrackets(iter.next())));
-    rule.setLimit(new BigDecimal(stripBrackets(iter.next())));
-    rule.setWindowMinutes(Integer.parseInt(stripBrackets(iter.next())));
+        // 使用迭代器逐个处理字段
+        Iterator<String> iter = tokens.iterator();
+        Rule rule = new Rule();
 
-    return rule;
-  }
+        // 解析每个字段并设置到Rule对象
+        rule.setRuleId(Integer.parseInt(stripBrackets(iter.next())));  // 规则ID
+        rule.setRuleState(RuleState.valueOf(stripBrackets(iter.next()).toUpperCase()));  // 规则状态
+        rule.setGroupingKeyNames(getNames(iter.next()));  // 分组键名
+        rule.setUnique(getNames(iter.next()));  // 唯一键名
+        rule.setAggregateFieldName(stripBrackets(iter.next()));  // 聚合字段名称
+        rule.setAggregatorFunctionType(
+                AggregatorFunctionType.valueOf(stripBrackets(iter.next()).toUpperCase()));  // 聚合函数类型
+        rule.setLimitOperatorType(LimitOperatorType.fromString(stripBrackets(iter.next())));  // 限制操作符类型
+        rule.setLimit(new BigDecimal(stripBrackets(iter.next())));  // 限制值
+        rule.setWindowMinutes(Integer.parseInt(stripBrackets(iter.next())));  // 窗口时间（分钟）
 
-  private static String stripBrackets(String expression) {
-    return expression.replaceAll("[()]", "");
-  }
-
-  private static List<String> getNames(String expression) {
-    String keyNamesString = expression.replaceAll("[()]", "");
-    if (!"".equals(keyNamesString)) {
-      String[] tokens = keyNamesString.split("&", -1);
-      return Arrays.asList(tokens);
-    } else {
-      return new ArrayList<>();
+        return rule;
     }
-  }
+
+    /**
+     * 去掉字符串中的括号。
+     *
+     * @param expression 要处理的字符串
+     * @return 去掉括号后的字符串
+     */
+    private static String stripBrackets(String expression) {
+        // 使用正则去掉括号
+        return expression.replaceAll("[()]", "");
+    }
+
+    /**
+     * 解析分组或唯一键名的字符串，返回键名列表。
+     * 键名通过"&"符号分隔。
+     *
+     * @param expression 键名的字符串表示
+     * @return 键名列表
+     */
+    private static List<String> getNames(String expression) {
+        // 去掉括号
+        String keyNamesString = expression.replaceAll("[()]", "");
+        // 如果字符串不为空，按"&"分隔成多个键名
+        if (!"".equals(keyNamesString)) {
+            String[] tokens = keyNamesString.split("&", -1);
+            return Arrays.asList(tokens);
+        } else {
+            // 如果为空，返回空列表
+            return new ArrayList<>();
+        }
+    }
 }
