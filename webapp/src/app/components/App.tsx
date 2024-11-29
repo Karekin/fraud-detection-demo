@@ -14,7 +14,7 @@ import "../assets/app.scss";
 import { Line } from "app/utils/useLines";
 
 // edit for rule timeouts. (s * ms)
-const RULE_TIMEOUT = 5 * 1000;
+const RULE_TIMEOUT = 60 * 60 * 1000;
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -42,8 +42,14 @@ export const App: FC = () => {
   // const { handleScroll } = useLines(transactionsRef, rules, alerts);
 
   useEffect(() => {
-    Axios.get<Rule[]>("/api/rules").then(response =>
-      setRules(response.data.map(rule => ({ ...rule, ref: createRef<HTMLDivElement>() })))
+    Axios.get<Rule[]>("/api/sqls").then(response =>
+      setRules(response.data.map(rule => {
+      console.log(response)
+      console.log(rule)
+      return (
+      { ...rule, ref: createRef<HTMLDivElement>() }
+      )}
+      ))
     );
   }, []);
 
@@ -75,7 +81,7 @@ export const App: FC = () => {
   }, [rules]);
 
   useEffect(() => {
-    const alertingRules = intersectionWith((rule, alert) => rule.id === alert.ruleId, rules, alerts).map(
+    const alertingRules = intersectionWith((rule, alert) => rule.content === alert.sql, rules, alerts).map(
       rule => rule.id
     );
     ruleLines.forEach(line => {
@@ -88,9 +94,13 @@ export const App: FC = () => {
   }, [rules, alerts, ruleLines]);
 
   useEffect(() => {
+    console.log("2021-07-25")
+    console.log(alerts)
+    console.log(rules)
     const newLines = alerts.map(alert => {
-      const rule = find(r => r.id === alert.ruleId, rules);
-
+      console.log(alert)
+      const rule = find(r => r.content === alert.sql, rules);
+      console.log(rule)
       return {
         line: new LeaderLine(rule!.ref.current, alert.ref.current, {
           color: "#fff",
@@ -109,7 +119,17 @@ export const App: FC = () => {
     return () => newLines.forEach(line => line.line.remove());
   }, [alerts, rules]);
 
-  const clearRule = (id: number) => () => setRules(rules.filter(rule => id !== rule.id));
+  const clearRule = (id: number) => () => {
+    console.log("CLEARING RULE " + id);
+    const removedRule = rules.find(rule => rule.id === id);
+    console.log(removedRule);
+    if(removedRule) {
+        console.log(alerts)
+        setAlerts(alerts.filter(alert => alert.sql !== removedRule.content));
+        console.log(alerts)
+    }
+    setRules(rules.filter(rule => id !== rule.id));
+  }
 
   const clearAlert = (id: number) => () => {
     setAlerts(state => {
@@ -120,6 +140,19 @@ export const App: FC = () => {
   };
 
   const handleMessage = (alert: Alert) => {
+     function arrayEquals(arr1: string[], arr2: string[]) {
+        return (
+          arr1.length === arr2.length &&
+          arr1.every((value, index) => value === arr2[index])
+        );
+      };
+
+    function compareAlerts(alertA: Alert, alertB: Alert) {
+      const ruleA = rules.find(rule => rule.content === alertA.sql);
+      const ruleB = rules.find(rule => rule.content === alertB.sql);
+      const sqlCmp = (ruleA ? ruleA.id : 0) - (ruleB ? ruleB.id : 0);
+     return sqlCmp === 0? alertA.timestamp - alertB.timestamp : sqlCmp;
+    }
     const alertId = uuid();
     const newAlert = {
       ...alert,
@@ -127,11 +160,18 @@ export const App: FC = () => {
       ref: createRef<HTMLDivElement>(),
       timeout: setTimeout(() => setAlerts(state => state.filter(a => a.alertId !== alertId)), RULE_TIMEOUT),
     };
-
-    setAlerts((state: Alert[]) => {
-      const filteredState = state.filter(a => a.ruleId !== alert.ruleId);
-      return [...filteredState, newAlert].sort((a, b) => (a.ruleId > b.ruleId ? 1 : -1));
-    });
+    if(alert.isAdded)
+        setAlerts((state: Alert[]) => {
+          const filteredState = state.filter(a => a.alertId !== alert.alertId);
+          return [...filteredState, newAlert].sort(compareAlerts);
+        });
+    else
+        setAlerts((state: Alert[]) => {
+                  const droppedAlert = state.find(a => arrayEquals(a.response, alert.response));
+                  const droppedAlertId = droppedAlert ? droppedAlert.alertId : ""
+                  const filteredState = state.filter(a => a.alertId !== droppedAlertId);
+                  return [...filteredState].sort(compareAlerts);
+        });
   };
 
   const handleLatencyMessage = (latency: string) => {

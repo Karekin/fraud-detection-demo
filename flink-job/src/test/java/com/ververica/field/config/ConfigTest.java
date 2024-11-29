@@ -18,11 +18,11 @@
 
 package com.ververica.field.config;
 
+import org.junit.Test;
+
 import static com.ververica.field.config.Parameters.KAFKA_HOST;
 import static com.ververica.field.config.Parameters.KAFKA_PORT;
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
 
 public class ConfigTest {
 

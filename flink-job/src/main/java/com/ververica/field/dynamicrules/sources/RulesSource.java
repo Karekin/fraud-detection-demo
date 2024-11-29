@@ -24,6 +24,7 @@ import static com.ververica.field.config.Parameters.RULES_SOURCE;
 import static com.ververica.field.config.Parameters.RULES_TOPIC;
 import static com.ververica.field.config.Parameters.SOCKET_PORT;
 
+import com.ververica.field.config.Parameters;
 import com.ververica.field.config.Config;
 import com.ververica.field.dynamicrules.KafkaUtils;
 import com.ververica.field.dynamicrules.Rule;

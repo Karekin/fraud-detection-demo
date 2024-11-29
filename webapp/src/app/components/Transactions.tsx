@@ -115,21 +115,20 @@ const Rocket = styled.span`
 `;
 
 const getFakeValue = (value: number) => {
-  return value <= 10 ? value : value <= 20 ? (value - 10) * 10 : (value - 20) * 100;
+  return 1 / value;
 };
 
 export const Transactions = React.memo(
   forwardRef<HTMLDivElement, {}>((props, ref) => {
     const list = useRef<List>(null);
+    const autoSizerLength = 20;
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const addTransaction = (transaction: Transaction) => setTransactions(state => [...state.slice(-33), transaction]);
+    const addTransaction = (transaction: Transaction) => setTransactions(state => [...state.slice(-autoSizerLength), transaction]);
 
-    const [generatorSpeed, setGeneratorSpeed] = useLocalStorage("generatorSpeed", 1);
+    const [generatorSpeed, setGeneratorSpeed] = useLocalStorage("generatorSpeed", 5);
     const handleSliderChange = (val: number) => setGeneratorSpeed(val);
+    const handleChangeComplete = () => fetch(`/api/generatorSpeed/${getFakeValue(generatorSpeed)}`);
 
-    useUpdateEffect(() => {
-      fetch(`/api/generatorSpeed/${getFakeValue(generatorSpeed)}`);
-    }, [generatorSpeed]);
 
     const renderRow: ListRowRenderer = ({ key, index, style }) => {
       const t = transactions[index];
@@ -157,13 +156,14 @@ export const Transactions = React.memo(
                 <Slider
                   value={generatorSpeed}
                   onChange={handleSliderChange}
-                  max={30}
-                  min={0}
+                  onChangeComplete={handleChangeComplete}
+                  max={10}
+                  min={1}
                   tooltip={false}
                   step={1}
                 />
               </div>
-              <span>{getFakeValue(generatorSpeed)}</span>
+              <span>1 event every {generatorSpeed} s</span>
             </CardHeader>
             <CardBody className="p-0 mb-0" style={{ pointerEvents: "none" }}>
               <TransactionsOverlay hidden={generatorSpeed < 16}>
@@ -189,7 +189,7 @@ export const Transactions = React.memo(
                     height={height}
                     width={width}
                     rowHeight={40}
-                    rowCount={transactions.length - 1}
+                    rowCount={Math.min(transactions.length - 1, autoSizerLength)}
                     rowRenderer={renderRow}
                   />
                 )}

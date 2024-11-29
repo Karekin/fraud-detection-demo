@@ -18,12 +18,11 @@
 
 package com.ververica.field.dynamicrules;
 
-import static com.ververica.field.config.Parameters.KAFKA_HOST;
-import static com.ververica.field.config.Parameters.KAFKA_PORT;
-import static com.ververica.field.config.Parameters.OFFSET;
-
 import com.ververica.field.config.Config;
+
 import java.util.Properties;
+
+import static com.ververica.field.config.Parameters.*;
 
 public class KafkaUtils {
 

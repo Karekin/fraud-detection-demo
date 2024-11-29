@@ -4,9 +4,9 @@ import styled from "styled-components/macro";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { Alert } from "../interfaces";
+import { Alert, Rule } from "../interfaces";
 import { CenteredContainer } from "./CenteredContainer";
-import { ScrollingCol } from "./App";
+import { ScrollingCol} from "./App";
 import { Payment, Payee, Details, Beneficiary, paymentTypeMap } from "./Transactions";
 import { Line } from "app/utils/useLines";
 
@@ -37,16 +37,17 @@ const AlertTable = styled(Table)`
 `;
 
 export const Alerts: FC<Props> = props => {
-  const tooManyAlerts = props.alerts.length > 4;
+
+  const tooManyAlerts = props.alerts.length > 40;
 
   const handleScroll = () => {
     props.lines.forEach(line => line.line.position());
   };
 
   return (
-    <ScrollingCol xs={{ size: 3, offset: 1 }} onScroll={handleScroll}>
+    <ScrollingCol xs={{ size: 5, offset: 1 }} onScroll={handleScroll}>
       {props.alerts.map((alert, idx) => {
-        const t = alert.triggeringEvent;
+        console.log(alert)
         return (
           <CenteredContainer
             key={idx}
@@ -56,51 +57,26 @@ export const Alerts: FC<Props> = props => {
             style={{ borderColor: "#ffc107", borderWidth: 2 }}
           >
             <CardHeader>
-              Alert
-              <Button size="sm" color="primary" onClick={props.clearAlert(idx)} className="ml-3">
-                Clear Alert
+              <Button size="sm" color="primary" onClick={props.clearAlert(idx)} className="mr-3">
+                            Clear Event
               </Button>
+              Event at {new Date(alert.timestamp).toLocaleString()}
             </CardHeader>
             <CardBody className="p-0">
               <AlertTable size="sm" bordered={true}>
                 <tbody>
                   <tr>
-                    <td>Transaction</td>
-                    <td>{alert.triggeringEvent.transactionId}</td>
-                  </tr>
-                  <tr>
-                    <td colSpan={2} className="p-0" style={{ borderBottomWidth: 3 }}>
-                      <Payment className="px-2">
-                        <Payee>{t.payeeId}</Payee>
-                        <Details>
-                          <FontAwesomeIcon className="mx-1" icon={paymentTypeMap[t.paymentType]} />
-                          <Badge color="info">${parseFloat(t.paymentAmount.toString()).toFixed(2)}</Badge>
-                          <FontAwesomeIcon className="mx-1" icon={faArrowRight} />
-                        </Details>
-                        <Beneficiary>{t.beneficiaryId}</Beneficiary>
-                      </Payment>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Rule</td>
-                    <td>{alert.ruleId}</td>
-                  </tr>
-                  <tr>
-                    <td>Amount</td>
-                    <td>{alert.triggeringValue}</td>
-                  </tr>
-                  <tr>
-                    <td>Of</td>
-                    <td>{alert.violatedRule.aggregateFieldName}</td>
+                    <th style={{ width: "15%" }}>Response</th>
+                    <th style={{ width: "85%" }}>
+                    {alert.response.map(text =>{
+                       return <td><tr>{"col" + alert.response.indexOf(text).toString()}</tr><tr>{text}</tr></td>;
+                       })}
+
+                    </th>
                   </tr>
                 </tbody>
               </AlertTable>
             </CardBody>
-            <CardFooter style={{ padding: "0.3rem" }}>
-              Alert for Rule <em>{alert.ruleId}</em> caused by Transaction{" "}
-              <em>{alert.triggeringEvent.transactionId}</em> with Amount <em>{alert.triggeringValue}</em> of{" "}
-              <em>{alert.violatedRule.aggregateFieldName}</em>.
-            </CardFooter>
           </CenteredContainer>
         );
       })}

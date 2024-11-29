@@ -19,13 +19,7 @@ import { FieldGroup } from "./FieldGroup";
 const headers = { "Content-Type": "application/json" };
 
 const pickFields = pick([
-  "aggregateFieldName",
-  "aggregatorFunctionType",
-  "groupingKeyNames",
-  "limit",
-  "limitOperatorType",
-  "ruleState",
-  "windowMinutes",
+  "sql",
 ]);
 
 type ResponseError = {
@@ -34,40 +28,33 @@ type ResponseError = {
 } | null;
 
 const sampleRules: {
-  [n: number]: RulePayload;
+  [n: number]: string;
 } = {
-  1: {
-    aggregateFieldName: "paymentAmount",
-    aggregatorFunctionType: "SUM",
-    groupingKeyNames: ["payeeId", "beneficiaryId"],
-    limit: 20000000,
-    limitOperatorType: "GREATER",
-    windowMinutes: 43200,
-    // tslint:disable-next-line:object-literal-sort-keys
-    ruleState: "ACTIVE",
-  },
-   2: {
-     aggregateFieldName: "paymentAmount",
-     aggregatorFunctionType: "SUM",
-     groupingKeyNames: ["beneficiaryId"],
-     limit: 10000000,
-     limitOperatorType: "GREATER_EQUAL",
-     windowMinutes: 1440,
-     // tslint:disable-next-line:object-literal-sort-keys
-     ruleState: "ACTIVE",
-   },
-  3: {
-    aggregateFieldName: "COUNT_WITH_RESET_FLINK",
-    aggregatorFunctionType: "SUM",
-    groupingKeyNames: ["paymentType"],
-    limit: 100,
-    limitOperatorType: "GREATER_EQUAL",
-    windowMinutes: 1440,
-    // tslint:disable-next-line:object-literal-sort-keys
-    ruleState: "ACTIVE",
-  },
-
-};
+      1:`SELECT COUNT(*)
+FROM source_table
+WHERE paymentAmount > 20`,
+      2: `SELECT paymentType, MAX(paymentAmount)
+FROM source_table
+GROUP BY paymentType`,
+      3: `SELECT t.payeeId, t.first_payment, t.second_payment
+FROM source_table MATCH_RECOGNIZE (
+  PARTITION BY payeeId
+  ORDER BY user_action_time
+  MEASURES
+    FIRST(paymentAmount) AS first_payment,
+    LAST(paymentAmount) AS second_payment
+  ONE ROW PER MATCH
+  AFTER MATCH SKIP PAST LAST ROW
+  PATTERN (A B)
+  DEFINE
+    A AS paymentAmount < 100,
+    B AS paymentAmount > 100
+) AS t`,
+    4: `SELECT AVG(paymentAmount) OVER (
+          ORDER BY user_action_time
+          ROWS BETWEEN 10 PRECEDING AND CURRENT ROW)
+        FROM source_table where paymentAmount < 20`
+    };
 
 const keywords = ["beneficiaryId", "payeeId", "paymentAmount", "paymentType"];
 const aggregateKeywords = ["paymentAmount", "COUNT_FLINK", "COUNT_WITH_RESET_FLINK"];
@@ -85,24 +72,48 @@ export const AddRuleModal: FC<Props> = props => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const data = pickFields(getFormData(e.target)) as RulePayload;
-    data.groupingKeyNames = isArray(data.groupingKeyNames) ? data.groupingKeyNames : [data.groupingKeyNames];
+    const content = data.sql;
+    console.log("Submitting sql: " + content)
 
-    const rulePayload = JSON.stringify(data);
-    const body = JSON.stringify({ rulePayload });
+    const body = JSON.stringify({ content });
 
     setError(null);
-    Axios.post<Rule>("/api/rules", body, { headers })
-      .then(response => props.setRules(rules => [...rules, { ...response.data, ref: createRef<HTMLDivElement>() }]))
+    Axios.post<Rule>("/api/sqls", body, { headers })
+      .then(response => {
+      console.log("POST");
+      console.log(body);
+      console.log("RESPONSE");
+      console.log(response);
+      props.setRules(rules => {
+          const newRule = { ...response.data, ref: createRef<HTMLDivElement>() };
+          console.log("NEW RULE");
+          console.log(newRule);
+          return [...rules, newRule];
+      })
+      })
       .then(props.onClosed)
       .catch(setError);
   };
 
   const postSampleRule = (ruleId: number) => (e: MouseEvent) => {
-    const rulePayload = JSON.stringify(sampleRules[ruleId]);
-    const body = JSON.stringify({ rulePayload });
+    const content = sampleRules[ruleId];
+    console.log("Submitting sql: " + content)
 
-    Axios.post<Rule>("/api/rules", body, { headers })
-      .then(response => props.setRules(rules => [...rules, { ...response.data, ref: createRef<HTMLDivElement>() }]))
+    const body = JSON.stringify({ content });
+
+    Axios.post<Rule>("/api/sqls", body, { headers })
+      .then(response => {
+          console.log("POST");
+          console.log(body);
+          console.log("RESPONSE");
+          console.log(response);
+          props.setRules(rules => {
+              const newRule = { ...response.data, ref: createRef<HTMLDivElement>() };
+              console.log("NEW RULE");
+              console.log(newRule);
+              return [...rules, newRule];
+          })
+      })
       .then(props.onClosed)
       .catch(setError);
   };
@@ -120,70 +131,23 @@ export const AddRuleModal: FC<Props> = props => {
         <ModalHeader toggle={props.toggle}>Add a new Rule</ModalHeader>
         <ModalBody>
           {error && <Alert color="danger">{error.error + ": " + error.message}</Alert>}
-          <FieldGroup label="ruleState" icon={faInfoCircle}>
-            <Input type="select" name="ruleState" bsSize="sm">
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="PAUSE">PAUSE</option>
-              <option value="DELETE">DELETE</option>
-            </Input>
-          </FieldGroup>
-
-          <FieldGroup label="aggregatorFunctionType" icon={faCalculator}>
-            <Input type="select" name="aggregatorFunctionType" bsSize="sm">
-              <option value="SUM">SUM</option>
-              <option value="AVG">AVG</option>
-              <option value="MIN">MIN</option>
-              <option value="MAX">MAX</option>
-            </Input>
-          </FieldGroup>
-
-          <FieldGroup label="aggregateFieldName" icon={faFont}>
-            <Input name="aggregateFieldName" type="select" bsSize="sm">
-              {aggregateKeywords.map(k => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </Input>
-          </FieldGroup>
-
-          <FieldGroup label="groupingKeyNames" icon={faLayerGroup}>
-            <MySelect
-              isMulti={true}
-              name="groupingKeyNames"
-              className="react-select"
-              classNamePrefix="react-select"
-              options={keywords.map(k => ({ value: k, label: k }))}
-            />
-          </FieldGroup>
-
-          <FieldGroup label="limitOperatorType" icon={faLaptopCode}>
-            <Input type="select" name="limitOperatorType" bsSize="sm">
-              <option value="EQUAL">EQUAL (=)</option>
-              <option value="NOT_EQUAL">NOT_EQUAL (!=)</option>
-              <option value="GREATER_EQUAL">GREATER_EQUAL (>=)</option>
-              <option value="LESS_EQUAL">LESS_EQUAL ({"<="})</option>
-              <option value="GREATER">GREATER (>)</option>
-              <option value="LESS">LESS ({"<"})</option>
-            </Input>
-          </FieldGroup>
-          <FieldGroup label="limit" icon={faArrowUp}>
-            <Input name="limit" bsSize="sm" type="number" />
-          </FieldGroup>
-          <FieldGroup label="windowMinutes" icon={faClock}>
-            <Input name="windowMinutes" bsSize="sm" type="number" />
+          <FieldGroup label="SQL" icon={faInfoCircle}>
+            <Input type="textarea" name="sql" bsSize="lg" />
           </FieldGroup>
         </ModalBody>
         <ModalFooter className="justify-content-between">
           <div>
             <Button color="secondary" onClick={postSampleRule(1)} size="sm" className="mr-2">
-              Sample Rule 1
+              COUNT Rule
             </Button>
             <Button color="secondary" onClick={postSampleRule(2)} size="sm" className="mr-2">
-              Sample Rule 2
+              GROUP BY Rule
             </Button>
             <Button color="secondary" onClick={postSampleRule(3)} size="sm" className="mr-2">
-              Sample Rule 3
+              MATCH_RECOGNIZE Rule
+            </Button>
+            <Button color="secondary" onClick={postSampleRule(4)} size="sm" className="mr-2">
+              WINDOW Rule
             </Button>
           </div>
           <div>

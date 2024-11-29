@@ -40,32 +40,12 @@ public class Transaction {
   public long payeeId;
   public long beneficiaryId;
   public BigDecimal paymentAmount;
-  public PaymentType paymentType;
+  public String paymentType;
 
   private static transient DateTimeFormatter timeFormatter =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
           .withLocale(Locale.US)
           .withZone(ZoneOffset.UTC);
-
-  public enum PaymentType {
-    CSH("CSH"),
-    CRD("CRD");
-
-    String representation;
-
-    PaymentType(String repr) {
-      this.representation = repr;
-    }
-
-    public static PaymentType fromString(String representation) {
-      for (PaymentType b : PaymentType.values()) {
-        if (b.representation.equals(representation)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
 
   public static Transaction fromString(String line) {
     List<String> tokens = Arrays.asList(line.split(","));
@@ -89,7 +69,7 @@ public class Transaction {
           ZonedDateTime.parse(iter.next(), timeFormatter).toInstant().toEpochMilli();
       transaction.payeeId = Long.parseLong(iter.next());
       transaction.beneficiaryId = Long.parseLong(iter.next());
-      transaction.paymentType = PaymentType.fromString(iter.next());
+      transaction.paymentType = iter.next();
       transaction.paymentAmount = new BigDecimal(iter.next());
     } catch (NumberFormatException nfe) {
       throw new RuntimeException("Invalid record: " + line, nfe);

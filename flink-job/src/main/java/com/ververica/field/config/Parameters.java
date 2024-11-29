@@ -18,6 +18,8 @@
 
 package com.ververica.field.config;
 
+import org.apache.flink.api.java.utils.ParameterTool;
+
 import java.util.Arrays;
 import java.util.List;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -26,33 +28,33 @@ public class Parameters {
 
   private final ParameterTool tool;
 
-  public Parameters(ParameterTool tool) {
-    this.tool = tool;
-  }
+//  public Parameters(ParameterTool tool) {
+//    this.tool = tool;
+//  }
 
-  <T> T getOrDefault(Param<T> param) {
-    if (!tool.has(param.getName())) {
-      return param.getDefaultValue();
-    }
-    Object value;
-    if (param.getType() == Integer.class) {
-      value = tool.getInt(param.getName());
-    } else if (param.getType() == Long.class) {
-      value = tool.getLong(param.getName());
-    } else if (param.getType() == Double.class) {
-      value = tool.getDouble(param.getName());
-    } else if (param.getType() == Boolean.class) {
-      value = tool.getBoolean(param.getName());
-    } else {
-      value = tool.get(param.getName());
-    }
-    return param.getType().cast(value);
-  }
-
-  public static Parameters fromArgs(String[] args) {
-    ParameterTool tool = ParameterTool.fromArgs(args);
-    return new Parameters(tool);
-  }
+//  <T> T getOrDefault(Param<T> param) {
+//    if (!tool.has(param.getName())) {
+//      return param.getDefaultValue();
+//    }
+//    Object value;
+//    if (param.getType() == Integer.class) {
+//      value = tool.getInt(param.getName());
+//    } else if (param.getType() == Long.class) {
+//      value = tool.getLong(param.getName());
+//    } else if (param.getType() == Double.class) {
+//      value = tool.getDouble(param.getName());
+//    } else if (param.getType() == Boolean.class) {
+//      value = tool.getBoolean(param.getName());
+//    } else {
+//      value = tool.get(param.getName());
+//    }
+//    return param.getType().cast(value);
+//  }
+//
+//  public static Parameters fromArgs(String[] args) {
+//    ParameterTool tool = ParameterTool.fromArgs(args);
+//    return new Parameters(tool);
+//  }
 
   // Kafka:
   public static final Param<String> KAFKA_HOST = Param.string("kafka-host", "localhost");
@@ -61,6 +63,7 @@ public class Parameters {
   public static final Param<String> DATA_TOPIC = Param.string("data-topic", "livetransactions");
   public static final Param<String> ALERTS_TOPIC = Param.string("alerts-topic", "alerts");
   public static final Param<String> RULES_TOPIC = Param.string("rules-topic", "rules");
+  public static final Param<String> SQLS_TOPIC = Param.string("sqls-topic", "sqls");
   public static final Param<String> LATENCY_TOPIC = Param.string("latency-topic", "latency");
   public static final Param<String> RULES_EXPORT_TOPIC =
       Param.string("current-rules-topic", "current-rules");
@@ -79,11 +82,11 @@ public class Parameters {
       Param.string("pubsub-rules-export", "current-rules-demo");
 
   // Socket
-  public static final Param<Integer> SOCKET_PORT = Param.integer("pubsub-rules-export", 9999);
-
+  public static final Param<Integer> SOCKET_PORT = Param.integer("socket-port", 9999);
   // General:
   //    source/sink types: kafka / pubsub / socket
   public static final Param<String> RULES_SOURCE = Param.string("rules-source", "SOCKET");
+  public static final Param<String> SQLS_SOURCE = Param.string("sqls-source", "SOCKET");
   public static final Param<String> TRANSACTIONS_SOURCE = Param.string("data-source", "GENERATOR");
   public static final Param<String> ALERTS_SINK = Param.string("alerts-sink", "STDOUT");
   public static final Param<String> LATENCY_SINK = Param.string("latency-sink", "STDOUT");
@@ -111,6 +114,7 @@ public class Parameters {
           DATA_TOPIC,
           ALERTS_TOPIC,
           RULES_TOPIC,
+          SQLS_TOPIC,
           LATENCY_TOPIC,
           RULES_EXPORT_TOPIC,
           OFFSET,
@@ -120,6 +124,7 @@ public class Parameters {
           GCP_PUBSUB_LATENCY_SUBSCRIPTION,
           GCP_PUBSUB_RULES_EXPORT_SUBSCRIPTION,
           RULES_SOURCE,
+          SQLS_SOURCE,
           TRANSACTIONS_SOURCE,
           ALERTS_SINK,
           LATENCY_SINK,
@@ -137,4 +142,34 @@ public class Parameters {
 
   public static final List<Param<Boolean>> BOOL_PARAMS =
       Arrays.asList(LOCAL_EXECUTION, ENABLE_CHECKPOINTS);
+
+  //  List<Param> list = Arrays.asList(new String[]{"foo", "bar"});
+
+  public Parameters(ParameterTool tool) {
+    this.tool = tool;
+  }
+
+  public static Parameters fromArgs(String[] args) {
+    ParameterTool tool = ParameterTool.fromArgs(args);
+    return new Parameters(tool);
+  }
+
+  <T> T getOrDefault(Param<T> param) {
+    if (!tool.has(param.getName())) {
+      return param.getDefaultValue();
+    }
+    Object value;
+    if (param.getType() == Integer.class) {
+      value = tool.getInt(param.getName());
+    } else if (param.getType() == Long.class) {
+      value = tool.getLong(param.getName());
+    } else if (param.getType() == Double.class) {
+      value = tool.getDouble(param.getName());
+    } else if (param.getType() == Boolean.class) {
+      value = tool.getBoolean(param.getName());
+    } else {
+      value = tool.get(param.getName());
+    }
+    return param.getType().cast(value);
+  }
 }

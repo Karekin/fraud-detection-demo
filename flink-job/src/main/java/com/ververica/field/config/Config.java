@@ -26,14 +26,6 @@ public class Config {
 
   private final Map<Param<?>, Object> values = new HashMap<>();
 
-  public <T> void put(Param<T> key, T value) {
-    values.put(key, value);
-  }
-
-  public <T> T get(Param<T> key) {
-    return key.getType().cast(values.get(key));
-  }
-
   public <T> Config(
       Parameters inputParams,
       List<Param<String>> stringParams,
@@ -47,6 +39,14 @@ public class Config {
   public static Config fromParameters(Parameters parameters) {
     return new Config(
         parameters, Parameters.STRING_PARAMS, Parameters.INT_PARAMS, Parameters.BOOL_PARAMS);
+  }
+
+  public <T> void put(Param<T> key, T value) {
+    values.put(key, value);
+  }
+
+  public <T> T get(Param<T> key) {
+    return key.getType().cast(values.get(key));
   }
 
   private <T> void overrideDefaults(Parameters inputParams, List<Param<T>> params) {

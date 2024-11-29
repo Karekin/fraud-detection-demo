@@ -84,22 +84,14 @@ const RuleTable = styled(Table)`
   }
 `;
 
-const fields = [
-  "aggregatorFunctionType",
-  "aggregateFieldName",
-  "groupingKeyNames",
-  "limitOperatorType",
-  "limit",
-  "windowMinutes",
-];
 
 // const omitFields = omit(["ruleId", "ruleState", "unique"]);
 
-const hasAlert = (alerts: Alert[], rule: Rule) => alerts.some(alert => alert.ruleId === rule.id);
+const hasAlert = (alerts: Alert[], rule: Rule) => alerts.some(alert => alert.sql === rule.content);
 
 export const Rules: FC<Props> = props => {
   const handleDelete = (id: number) => () => {
-    Axios.delete(`/api/rules/${id}`).then(props.clearRule(id));
+    Axios.delete(`/api/sqls/${id}`).then(props.clearRule(id));
   };
 
   const handleScroll = () => {
@@ -110,11 +102,9 @@ export const Rules: FC<Props> = props => {
   const tooManyRules = props.rules.length > 3;
 
   return (
-    <ScrollingCol xs={{ size: 5, offset: 1 }} onScroll={handleScroll}>
+    <ScrollingCol xs={{ size: 3, offset: 1 }} onScroll={handleScroll}>
       {props.rules.map(rule => {
-        const payload = JSON.parse(rule.rulePayload);
-
-        if (!payload) {
+        if (!rule.content) {
           return null;
         }
 
@@ -132,37 +122,13 @@ export const Rules: FC<Props> = props => {
               <RuleTitle>
                 <FontAwesomeIcon icon={faInfoCircle} fixedWidth={true} className="mr-2" />
                 Rule #{rule.id}{" "}
-                <Badge color={badgeColorMap[payload.ruleState]} className="ml-2">
-                  {payload.ruleState}
-                </Badge>
               </RuleTitle>
               <Button size="sm" color="danger" outline={true} onClick={handleDelete(rule.id)}>
                 Delete
               </Button>
             </CardHeader>
-            <CardBody className="p-0">
-              <RuleTable size="sm" bordered={true}>
-                <tbody>
-                  {fields.map(key => {
-                    const field = payload[key];
-                    return (
-                      <tr key={key}>
-                        <td style={{ width: 10 }}>
-                          <FontAwesomeIcon icon={iconMap[key]} fixedWidth={true} />
-                        </td>
-                        <td style={{ width: 30 }}>{key}</td>
-                        <td>{isArray(field) ? field.map(v => `"${v}"`).join(", ") : field}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </RuleTable>
-            </CardBody>
-            <CardFooter style={{ padding: "0.3rem" }}>
-              <em>{payload.aggregatorFunctionType}</em> of <em>{payload.aggregateFieldName}</em> aggregated by "
-              <em>{payload.groupingKeyNames.join(", ")}</em>" is <em>{payload.limitOperatorType}</em>{" "}
-              {seperator[payload.limitOperatorType]} <em>{payload.limit}</em> within an interval of{" "}
-              <em>{payload.windowMinutes}</em> minutes.
+            <CardFooter style={{ padding: "0.3rem", whiteSpace: "pre-wrap" }}>
+              <em>{rule.content}</em>
             </CardFooter>
           </CenteredContainer>
         );

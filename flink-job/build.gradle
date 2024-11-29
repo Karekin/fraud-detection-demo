@@ -126,6 +126,18 @@ dependencies {
     flinkShadowJar "org.apache.flink:flink-connector-kafka:$flinkVersion"
     flinkShadowJar "org.apache.flink:flink-connector-gcp-pubsub:$flinkVersion"
     flinkShadowJar group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.51.0'
+
+    // Flink CEP (Complex Event Processing)
+    flinkShadowJar "org.apache.flink:flink-cep_${scalaBinaryVersion}:${flinkVersion}"
+
+    // Flink Table API & SQL
+    flinkShadowJar "org.apache.flink:flink-table-planner_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-table-api-scala-bridge_${scalaBinaryVersion}:${flinkVersion}"
+
+    // 确保所有相关依赖都包括
+    flinkShadowJar "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-core:${flinkVersion}"
 }
 
 // make compileOnly dependencies available for tests:

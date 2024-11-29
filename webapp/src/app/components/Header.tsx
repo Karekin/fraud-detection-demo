@@ -34,10 +34,6 @@ export const Header: FC<Props> = props => {
   const startTransactions = () => fetch("/api/startTransactionsGeneration").then();
   const stopTransactions = () => fetch("/api/stopTransactionsGeneration").then();
 
-  const syncRules = () => fetch("/api/syncRules").then();
-  const clearState = () => fetch("/api/clearState").then();
-  const pushToFlink = () => fetch("/api/rules/pushToFlink").then();
-
   return (
     <>
       <AppNavbar color="dark" dark={true}>
@@ -57,22 +53,10 @@ export const Header: FC<Props> = props => {
           <Button size="sm" color="primary" onClick={openRuleModal}>
             Add Rule
           </Button>
-
-          <Button size="sm" color="warning" onClick={syncRules}>
-            Sync Rules
-          </Button>
-
-          <Button size="sm" color="warning" onClick={clearState}>
-            Clear State
-          </Button>
-
-          <Button size="sm" color="warning" onClick={pushToFlink}>
-            Push to Flink
-          </Button>
         </Col>
 
         <Col xs={{ size: 3, offset: 1 }} className="justify-content-end d-flex align-items-center">
-          <NavbarBrand tag="div">Apache Flink - Fraud Detection Demo</NavbarBrand>
+          <NavbarBrand tag="div">Flink Dynamic CEP Demo</NavbarBrand>
           <Logo src={logoImage} title="Apache Flink" />
         </Col>
       </AppNavbar>

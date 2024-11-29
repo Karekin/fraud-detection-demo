@@ -1,12 +1,12 @@
 import { Transaction } from "./Transaction";
 import { RefObject } from "react";
-import { RulePayload } from "./Rule";
 
 export interface Alert {
   alertId: string;
-  ruleId: number;
-  violatedRule: RulePayload;
-  triggeringValue: number;
-  triggeringEvent: Transaction;
+  isAdded: boolean;
+  timestamp: number;
+  response: string[];
+  sql: string;
   ref: RefObject<HTMLDivElement>;
+  timeout: number
 }

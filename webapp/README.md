@@ -32,31 +32,12 @@ Swagger is available under:
 http://localhost:5656/swagger-ui.html
 ```
 
-Example Rule JSON:
+Example SQL:
 
 ```
-{
-   "ruleId":1,
-   "ruleState":"ACTIVE",
-   "groupingKeyNames":[
-      "paymentType"
-   ],
-   "unique":[],
-   "aggregateFieldName":"paymentAmount",
-   "aggregatorFunctionType":"SUM",
-   "limitOperatorType":"GREATER",
-   "limit":50,
-   "windowMinutes":20
-}
+SELECT payeeId FROM source_table WHERE paymentAmount > 10
 ```
 
-where
-
-```
-ruleState in ["ACTIVE", "PAUSE", "DELETE"]
-aggregateFunctionType in [SUM, AVG, MIN, MAX]
-limitOperatorType in [EQUAL("="), NOT_EQUAL("!="), GREATER_EQUAL(">="), LESS_EQUAL("<="), GREATER(">"),LESS("<")]
-```
 
 H2 Console:
 

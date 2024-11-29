@@ -27,8 +27,8 @@ import org.apache.flink.util.Collector;
 @Slf4j
 public class JsonDeserializer<T> extends RichFlatMapFunction<String, T> {
 
-  private JsonMapper<T> parser;
   private final Class<T> targetClass;
+  private JsonMapper<T> parser;
 
   public JsonDeserializer(Class<T> targetClass) {
     this.targetClass = targetClass;
