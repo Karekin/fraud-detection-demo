@@ -19,7 +19,6 @@
 package com.ververica.field.dynamicrules;
 
 import com.ververica.field.config.Config;
-import com.ververica.field.dynamicrules.converters.StringConverter;
 import com.ververica.field.dynamicrules.converters.TransactionStringConverter;
 import com.ververica.field.dynamicrules.functions.DynamicSqlCepFunction;
 import com.ververica.field.dynamicrules.sinks.AlertsSink;
@@ -79,7 +78,7 @@ public class SQLRunner {
 
         // Streams setup
         DataStream<TransactionEvent> transactions = getTransactionsStream(env).keyBy("payeeId");
-        AssignerWithPeriodicWatermarks assigner =
+        AssignerWithPeriodicWatermarks<TransactionEvent> assigner =
                 new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS));
 
         // 暂时用 DynamicSqlCepFunction 替换 BroadcastEmbeddedFlinkFunction
