@@ -31,8 +31,8 @@ public class Main {
     Parameters inputParams = new Parameters(tool);
     Config config = new Config(inputParams, STRING_PARAMS, INT_PARAMS, BOOL_PARAMS);
     // 处理 Stream 数据
-    RulesEvaluator rulesEvaluator = new RulesEvaluator(config);
-    rulesEvaluator.run();
+//    RulesEvaluator rulesEvaluator = new RulesEvaluator(config);
+//    rulesEvaluator.run();
     // 处理 Table 数据
     SQLRunner sqlRunner = new SQLRunner(config);
     sqlRunner.run();

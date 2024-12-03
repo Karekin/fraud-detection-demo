@@ -3,10 +3,12 @@ package com.ververica.field.function.data;
 import com.ververica.field.dynamicrules.util.TimestampHelpers;
 import com.ververica.field.dynamicrules.sources.TimeBasedEvent;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Data
 public class ShortBillingEvent extends TimeBasedEvent implements Serializable {

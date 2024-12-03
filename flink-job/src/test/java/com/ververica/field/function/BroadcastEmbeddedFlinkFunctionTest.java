@@ -49,169 +49,169 @@ package com.ververica.field.function;//package com.ververica.field.function;
 //  AssignerWithPeriodicWatermarks assigner =
 //      new PeriodicTimestampAssigner<ShortBillingEvent>(Integer.toUnsignedLong(sourceConfig.timeSpeedMultiplier()), 100L);
 //
-//  //    @Test
-//  //    public void runBalanceChange() throws Exception {
-//  //
-//  //        for (int i = 1; i <= 3; i++) {
-//  //            new BroadcastEmbeddedFlinkFunctionTestBase<String, ShortBillingEvent>(
-//  //                    "/example-input-data/balance_change_example_data_" + i + ".csv",
-//  //                    "/example-input-data/broadcast_example_data_empty.csv",
-//  //                    timeSpeedMultiplier,
-//  //                    processingTimeDelaySeconds,
-//  //                    //                        "SELECT msisdn, eventDate FROM source_table WHERE
-//  // 1=1",
-//  //                    "SELECT t.msisdn, t.eventDate, user_tm FROM ( SELECT msisdn, eventDate,
-//  // CAST(user_action_time AS TIMESTAMP) user_tm, CASE WHEN balanceBefore <=  10 AND balanceAfter >
-//  // 10 THEN 'A' WHEN balanceBefore >  10 AND balanceAfter <=  10 THEN 'C' ELSE 'B' END AS
-//  // patternVal FROM source_table ) t LEFT JOIN ( SELECT x.msisdn, x.`timestamp` , x.begin_date,
-//  // x.end_date FROM source_table MATCH_RECOGNIZE ( PARTITION BY msisdn ORDER BY user_action_time
-//  // MEASURES LAST(user_action_time) AS `timestamp`, A.eventDate AS begin_date, C.eventDate AS
-//  // end_date ONE ROW PER MATCH AFTER MATCH SKIP PAST LAST ROW PATTERN (A B*? C)  WITHIN INTERVAL
-//  // '25' SECOND DEFINE A AS A.balanceBefore <=  10 AND A.balanceAfter >  10, C AS C.balanceBefore >
-//  //  10 AND C.balanceAfter <=  10 ) AS x ) p ON t.msisdn = p.msisdn AND t.eventDate = p.begin_date
-//  // WHERE  t.patternVal = 'A' AND (p.msisdn is null OR timestampdiff(SECOND, CAST(p.begin_date AS
-//  // TIMESTAMP), CAST(p.end_date AS TIMESTAMP)) > 25)",
-//  //                    converterIn,
-//  //                    Arrays.asList("msisdn",
-//  //                            "eventDate",
-//  //                            "balanceBefore",
-//  //                            "balanceAfter"),
-//  //                    "/expected-output-data/balance_change_alerts_" + i + ".csv",
-//  //                    assigner,
-//  //                    "msisdn",
-//  //                    TypeInformation.of(new TypeHint<ShortBillingEvent>() {
-//  //                    }),
-//  //                    tag
-//  //            ).run();
-//  //            System.out.println("CASE " + i + " PASSED");
-//  //        }
-//  //
-//  //    }
-//  //
-//  //    @Test
-//  //    public void runCoreServiceUsage() throws Exception {
-//  //
-//  //        ClassTag<CoreServiceUsageBillingEvent> tag =
-//  // scala.reflect.ClassTag$.MODULE$.apply(CoreServiceUsageBillingEvent.class);
-//  //
-//  //        StringConverter<CoreServiceUsageBillingEvent> converterIn = new
-//  // StringConverter<CoreServiceUsageBillingEvent>() {
-//  //            @Override
-//  //            public String toString(CoreServiceUsageBillingEvent input) {
-//  //                return String.join(",", new String[]{
-//  //                        input.msisdn,
-//  //                        input.eventDate,
-//  //                        input.sourceEventType,
-//  //                        input.sourceStatus,
-//  //                        input.servedZone,
-//  //                        input.otherZone,
-//  //                        input.consumptionAmount.toString()
-//  //                });
-//  //            }
-//  //
-//  //            @Override
-//  //            public CoreServiceUsageBillingEvent toValue(String input) {
-//  //                return (CoreServiceUsageBillingEvent) new
-//  // CoreServiceUsageBillingEvent().apply(input.trim(), ",");
-//  //            }
-//  //        };
-//  //        AssignerWithPeriodicWatermarks assigner = new
-//  // PeriodicTimestampAssigner<CoreServiceUsageBillingEvent>(sourceConfig.timeSpeedMultiplier(),
-//  // 100).value();
-//  //
-//  //
-//  //        new BroadcastEmbeddedFlinkFunctionTestBase<String, CoreServiceUsageBillingEvent>(
-//  //                "/example-input-data/core_service_usage_example_data.csv",
-//  //                "/example-input-data/broadcast_example_data_empty.csv",
-//  //                timeSpeedMultiplier,
-//  //                processingTimeDelaySeconds,
-//  //                "SELECT t.msisdn, t.user_tm, t.first_other_zone, t.last_other_zone,
-//  // t.first_served_zone, t.last_served_zone, t.event_type FROM source_table MATCH_RECOGNIZE (
-//  // PARTITION BY msisdn    ORDER BY user_action_time    MEASURES        CAST(user_action_time AS
-//  // TIMESTAMP) AS user_tm,        FIRST(otherZone) AS first_other_zone,        LAST(otherZone) AS
-//  // last_other_zone,        FIRST(servedZone) AS first_served_zone,        LAST(servedZone) AS
-//  // last_served_zone,        LAST(sourceEventType) AS event_type    ONE ROW PER MATCH    AFTER
-//  // MATCH SKIP PAST LAST ROW    PATTERN (A+? B)  WITHIN INTERVAL '45' SECOND    DEFINE      B AS
-//  // SUM(consumptionAmount) > 10 ) AS t",
-//  //                converterIn,
-//  //                Arrays.asList("msisdn",
-//  //                        "eventDate",
-//  //                        "sourceEventType",
-//  //                        "sourceStatus",
-//  //                        "servedZone",
-//  //                        "otherZone",
-//  //                        "consumptionAmount"),
-//  //                "/expected-output-data/core_service_usage_alerts.csv",
-//  //                assigner,
-//  //                "msisdn",
-//  //                TypeInformation.of(new TypeHint<CoreServiceUsageBillingEvent>() {
-//  //                }),
-//  //                tag
-//  //        ).run();
-//  //
-//  //
-//  //    }
-//  //
-//  //
-//  //    @Test
-//  //    public void runSubscriberTermination() throws Exception {
-//  //
-//  //        ClassTag<SubscriberTerminationBillingEvent> tag =
-//  // scala.reflect.ClassTag$.MODULE$.apply(SubscriberTerminationBillingEvent.class);
-//  //
-//  //        StringConverter<SubscriberTerminationBillingEvent> converterInST = new
-//  // StringConverter<SubscriberTerminationBillingEvent>() {
-//  //            @Override
-//  //            public String toString(SubscriberTerminationBillingEvent input) {
-//  //                return String.join(",", new String[]{
-//  //                        input.msisdn,
-//  //                        input.eventDate,
-//  //                        input.sourceEventType,
-//  //                        input.sourceStatus
-//  //                });
-//  //            }
-//  //
-//  //            @Override
-//  //            public SubscriberTerminationBillingEvent toValue(String input) {
-//  //                return (SubscriberTerminationBillingEvent) new
-//  // SubscriberTerminationBillingEvent().apply(input.trim(), ",");
-//  //            }
-//  //        };
-//  //        AssignerWithPeriodicWatermarks assigner = new
-//  // PeriodicTimestampAssigner<SubscriberTerminationBillingEvent>(sourceConfig.timeSpeedMultiplier(), 100).value();
-//  //
-//  //
-//  //        new BroadcastEmbeddedFlinkFunctionTestBase<String, SubscriberTerminationBillingEvent>(
-//  //                "/example-input-data/subscriber_termination_example_data.csv",
-//  //                "/example-input-data/broadcast_example_data_empty.csv",
-//  //                timeSpeedMultiplier,
-//  //                processingTimeDelaySeconds,
-//  //                "SELECT msisdn, eventDate FROM source_table WHERE 1=1",
-//  ////                "SELECT t.msisdn, t.user_tm, t.termination_type  FROM source_table
-//  // MATCH_RECOGNIZE (        PARTITION BY msisdn        ORDER BY user_action_time        MEASURES
-//  //          CAST(user_action_time AS TIMESTAMP) AS user_tm,            LAST(sourceEventType) AS
-//  // termination_type        ONE ROW PER MATCH        AFTER MATCH SKIP PAST LAST ROW        PATTERN
-//  // (A B C)  WITHIN INTERVAL '30' SECOND     DEFINE       C AS A.sourceStatus IN ('UPDATE',
-//  // 'DELETE') AND B.sourceStatus IN ('UPDATE', 'DELETE') AND A.sourceStatus <> B.sourceStatus OR
-//  //         A.sourceStatus IN ('UPDATE', 'DELETE') AND C.sourceStatus IN ('UPDATE', 'DELETE') AND
-//  // A.sourceStatus <> C.sourceStatus OR            B.sourceStatus IN ('UPDATE', 'DELETE') AND
-//  // C.sourceStatus IN ('UPDATE', 'DELETE') AND B.sourceStatus <> C.sourceStatus      ) AS t",
-//  //                converterInST,
-//  //                Arrays.asList("msisdn",
-//  //                        "eventDate",
-//  //                        "sourceEventType",
-//  //                        "sourceStatus"),
-//  //                "/expected-output-data/subscriber_termination_alerts.csv",
-//  //                assigner,
-//  //                "msisdn",
-//  //                TypeInformation.of(new TypeHint<SubscriberTerminationBillingEvent>() {
-//  //                }),
-//  //                tag
-//  //        ).run();
-//  //
-//  //
-//  //    }
-//  //
+  //    @Test
+  //    public void runBalanceChange() throws Exception {
+  //
+  //        for (int i = 1; i <= 3; i++) {
+  //            new BroadcastEmbeddedFlinkFunctionTestBase<String, ShortBillingEvent>(
+  //                    "/example-input-data/balance_change_example_data_" + i + ".csv",
+  //                    "/example-input-data/broadcast_example_data_empty.csv",
+  //                    timeSpeedMultiplier,
+  //                    processingTimeDelaySeconds,
+  //                    //                        "SELECT msisdn, eventDate FROM source_table WHERE
+  // 1=1",
+  //                    "SELECT t.msisdn, t.eventDate, user_tm FROM ( SELECT msisdn, eventDate,
+  // CAST(user_action_time AS TIMESTAMP) user_tm, CASE WHEN balanceBefore <=  10 AND balanceAfter >
+  // 10 THEN 'A' WHEN balanceBefore >  10 AND balanceAfter <=  10 THEN 'C' ELSE 'B' END AS
+  // patternVal FROM source_table ) t LEFT JOIN ( SELECT x.msisdn, x.`timestamp` , x.begin_date,
+  // x.end_date FROM source_table MATCH_RECOGNIZE ( PARTITION BY msisdn ORDER BY user_action_time
+  // MEASURES LAST(user_action_time) AS `timestamp`, A.eventDate AS begin_date, C.eventDate AS
+  // end_date ONE ROW PER MATCH AFTER MATCH SKIP PAST LAST ROW PATTERN (A B*? C)  WITHIN INTERVAL
+  // '25' SECOND DEFINE A AS A.balanceBefore <=  10 AND A.balanceAfter >  10, C AS C.balanceBefore >
+  //  10 AND C.balanceAfter <=  10 ) AS x ) p ON t.msisdn = p.msisdn AND t.eventDate = p.begin_date
+  // WHERE  t.patternVal = 'A' AND (p.msisdn is null OR timestampdiff(SECOND, CAST(p.begin_date AS
+  // TIMESTAMP), CAST(p.end_date AS TIMESTAMP)) > 25)",
+  //                    converterIn,
+  //                    Arrays.asList("msisdn",
+  //                            "eventDate",
+  //                            "balanceBefore",
+  //                            "balanceAfter"),
+  //                    "/expected-output-data/balance_change_alerts_" + i + ".csv",
+  //                    assigner,
+  //                    "msisdn",
+  //                    TypeInformation.of(new TypeHint<ShortBillingEvent>() {
+  //                    }),
+  //                    tag
+  //            ).run();
+  //            System.out.println("CASE " + i + " PASSED");
+  //        }
+  //
+  //    }
+  //
+  //    @Test
+  //    public void runCoreServiceUsage() throws Exception {
+  //
+  //        ClassTag<CoreServiceUsageBillingEvent> tag =
+  // scala.reflect.ClassTag$.MODULE$.apply(CoreServiceUsageBillingEvent.class);
+  //
+  //        StringConverter<CoreServiceUsageBillingEvent> converterIn = new
+  // StringConverter<CoreServiceUsageBillingEvent>() {
+  //            @Override
+  //            public String toString(CoreServiceUsageBillingEvent input) {
+  //                return String.join(",", new String[]{
+  //                        input.msisdn,
+  //                        input.eventDate,
+  //                        input.sourceEventType,
+  //                        input.sourceStatus,
+  //                        input.servedZone,
+  //                        input.otherZone,
+  //                        input.consumptionAmount.toString()
+  //                });
+  //            }
+  //
+  //            @Override
+  //            public CoreServiceUsageBillingEvent toValue(String input) {
+  //                return (CoreServiceUsageBillingEvent) new
+  // CoreServiceUsageBillingEvent().apply(input.trim(), ",");
+  //            }
+  //        };
+  //        AssignerWithPeriodicWatermarks assigner = new
+  // PeriodicTimestampAssigner<CoreServiceUsageBillingEvent>(sourceConfig.timeSpeedMultiplier(),
+  // 100).value();
+  //
+  //
+  //        new BroadcastEmbeddedFlinkFunctionTestBase<String, CoreServiceUsageBillingEvent>(
+  //                "/example-input-data/core_service_usage_example_data.csv",
+  //                "/example-input-data/broadcast_example_data_empty.csv",
+  //                timeSpeedMultiplier,
+  //                processingTimeDelaySeconds,
+  //                "SELECT t.msisdn, t.user_tm, t.first_other_zone, t.last_other_zone,
+  // t.first_served_zone, t.last_served_zone, t.event_type FROM source_table MATCH_RECOGNIZE (
+  // PARTITION BY msisdn    ORDER BY user_action_time    MEASURES        CAST(user_action_time AS
+  // TIMESTAMP) AS user_tm,        FIRST(otherZone) AS first_other_zone,        LAST(otherZone) AS
+  // last_other_zone,        FIRST(servedZone) AS first_served_zone,        LAST(servedZone) AS
+  // last_served_zone,        LAST(sourceEventType) AS event_type    ONE ROW PER MATCH    AFTER
+  // MATCH SKIP PAST LAST ROW    PATTERN (A+? B)  WITHIN INTERVAL '45' SECOND    DEFINE      B AS
+  // SUM(consumptionAmount) > 10 ) AS t",
+  //                converterIn,
+  //                Arrays.asList("msisdn",
+  //                        "eventDate",
+  //                        "sourceEventType",
+  //                        "sourceStatus",
+  //                        "servedZone",
+  //                        "otherZone",
+  //                        "consumptionAmount"),
+  //                "/expected-output-data/core_service_usage_alerts.csv",
+  //                assigner,
+  //                "msisdn",
+  //                TypeInformation.of(new TypeHint<CoreServiceUsageBillingEvent>() {
+  //                }),
+  //                tag
+  //        ).run();
+  //
+  //
+  //    }
+  //
+  //
+  //    @Test
+  //    public void runSubscriberTermination() throws Exception {
+  //
+  //        ClassTag<SubscriberTerminationBillingEvent> tag =
+  // scala.reflect.ClassTag$.MODULE$.apply(SubscriberTerminationBillingEvent.class);
+  //
+  //        StringConverter<SubscriberTerminationBillingEvent> converterInST = new
+  // StringConverter<SubscriberTerminationBillingEvent>() {
+  //            @Override
+  //            public String toString(SubscriberTerminationBillingEvent input) {
+  //                return String.join(",", new String[]{
+  //                        input.msisdn,
+  //                        input.eventDate,
+  //                        input.sourceEventType,
+  //                        input.sourceStatus
+  //                });
+  //            }
+  //
+  //            @Override
+  //            public SubscriberTerminationBillingEvent toValue(String input) {
+  //                return (SubscriberTerminationBillingEvent) new
+  // SubscriberTerminationBillingEvent().apply(input.trim(), ",");
+  //            }
+  //        };
+  //        AssignerWithPeriodicWatermarks assigner = new
+  // PeriodicTimestampAssigner<SubscriberTerminationBillingEvent>(sourceConfig.timeSpeedMultiplier(), 100).value();
+  //
+  //
+  //        new BroadcastEmbeddedFlinkFunctionTestBase<String, SubscriberTerminationBillingEvent>(
+  //                "/example-input-data/subscriber_termination_example_data.csv",
+  //                "/example-input-data/broadcast_example_data_empty.csv",
+  //                timeSpeedMultiplier,
+  //                processingTimeDelaySeconds,
+  //                "SELECT msisdn, eventDate FROM source_table WHERE 1=1",
+  ////                "SELECT t.msisdn, t.user_tm, t.termination_type  FROM source_table
+  // MATCH_RECOGNIZE (        PARTITION BY msisdn        ORDER BY user_action_time        MEASURES
+  //          CAST(user_action_time AS TIMESTAMP) AS user_tm,            LAST(sourceEventType) AS
+  // termination_type        ONE ROW PER MATCH        AFTER MATCH SKIP PAST LAST ROW        PATTERN
+  // (A B C)  WITHIN INTERVAL '30' SECOND     DEFINE       C AS A.sourceStatus IN ('UPDATE',
+  // 'DELETE') AND B.sourceStatus IN ('UPDATE', 'DELETE') AND A.sourceStatus <> B.sourceStatus OR
+  //         A.sourceStatus IN ('UPDATE', 'DELETE') AND C.sourceStatus IN ('UPDATE', 'DELETE') AND
+  // A.sourceStatus <> C.sourceStatus OR            B.sourceStatus IN ('UPDATE', 'DELETE') AND
+  // C.sourceStatus IN ('UPDATE', 'DELETE') AND B.sourceStatus <> C.sourceStatus      ) AS t",
+  //                converterInST,
+  //                Arrays.asList("msisdn",
+  //                        "eventDate",
+  //                        "sourceEventType",
+  //                        "sourceStatus"),
+  //                "/expected-output-data/subscriber_termination_alerts.csv",
+  //                assigner,
+  //                "msisdn",
+  //                TypeInformation.of(new TypeHint<SubscriberTerminationBillingEvent>() {
+  //                }),
+  //                tag
+  //        ).run();
+  //
+  //
+  //    }
+  //
 ////
 ////      @Test
 ////      public void runBroadcastSQL() throws Exception {

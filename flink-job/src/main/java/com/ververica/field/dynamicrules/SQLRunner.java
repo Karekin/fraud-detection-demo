@@ -20,6 +20,7 @@ package com.ververica.field.dynamicrules;
 
 import com.ververica.field.config.Config;
 import com.ververica.field.dynamicrules.converters.TransactionStringConverter;
+import com.ververica.field.dynamicrules.functions.BroadcastEmbeddedFlinkFunction;
 import com.ververica.field.dynamicrules.functions.DynamicSqlCepFunction;
 import com.ververica.field.dynamicrules.sinks.AlertsSink;
 import com.ververica.field.dynamicrules.sources.SqlsSource;
@@ -31,6 +32,7 @@ import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
@@ -42,6 +44,7 @@ import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.types.Row;
 
 import java.io.IOException;
@@ -82,8 +85,8 @@ public class SQLRunner {
                 new SimpleBoundedOutOfOrdernessTimestampExtractor<>(config.get(OUT_OF_ORDERNESS));
 
         // 暂时用 DynamicSqlCepFunction 替换 BroadcastEmbeddedFlinkFunction
-        DynamicSqlCepFunction<String, TransactionEvent> embeddedFlinkFunction =
-                new DynamicSqlCepFunction<String, TransactionEvent>(
+        BroadcastEmbeddedFlinkFunction<String, TransactionEvent> embeddedFlinkFunction =
+                new BroadcastEmbeddedFlinkFunction<String, TransactionEvent>(
                         TypeInformation.of(new TypeHint<TransactionEvent>() {
                         }),
                         Arrays.asList(
@@ -108,7 +111,7 @@ public class SQLRunner {
 
         BroadcastStream<SqlEvent> sqlBroadcastStream = sqls.broadcast(ruleStateDescriptor);
 
-        DataStream<Tuple4<String, Boolean, Row, Long>> output =
+        DataStream<Tuple3<String, RowData, Long>> output =
                 transactions.connect(sqlBroadcastStream).process(embeddedFlinkFunction).setParallelism(1);
 
         output.print().name("StreamAlert STDOUT Sink");

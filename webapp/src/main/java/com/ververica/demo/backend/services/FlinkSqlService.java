@@ -17,7 +17,6 @@
 
 package com.ververica.demo.backend.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ververica.demo.backend.configurations.PropertyLogger;
 import com.ververica.demo.backend.repositories.SqlRepositoryEvent;

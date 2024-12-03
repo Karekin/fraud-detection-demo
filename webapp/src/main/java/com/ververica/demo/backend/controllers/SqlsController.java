@@ -17,19 +17,17 @@
 
 package com.ververica.demo.backend.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ververica.demo.backend.configurations.PropertyLogger;
 import com.ververica.demo.backend.repositories.SqlRepository;
 import com.ververica.demo.backend.repositories.SqlRepositoryEvent;
 import com.ververica.demo.backend.services.FlinkSqlService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")

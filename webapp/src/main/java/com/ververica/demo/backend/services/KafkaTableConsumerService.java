@@ -42,7 +42,8 @@ public class KafkaTableConsumerService {
   private String latencyWebSocketTopic;
 
   @Autowired
-  public KafkaTableConsumerService(SimpMessagingTemplate simpTemplate, SqlRepository sqlRepository) {
+  public KafkaTableConsumerService(
+      SimpMessagingTemplate simpTemplate, SqlRepository sqlRepository) {
     this.simpTemplate = simpTemplate;
     this.sqlRepository = sqlRepository;
   }

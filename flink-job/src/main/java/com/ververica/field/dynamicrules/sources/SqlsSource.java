@@ -70,19 +70,26 @@ public class SqlsSource {
 
   public static DataStream<SqlEvent> stringsStreamToSqls(DataStream<String> sqlStrings) {
     return sqlStrings
-        .flatMap(new SqlDeserializer())
-        .name("SQL Deserialization")
-        .setParallelism(SQLS_STREAM_PARALLELISM)
-        .assignTimestampsAndWatermarks(
-            new BoundedOutOfOrdernessTimestampExtractor<SqlEvent>(
-                Time.of(0, TimeUnit.MILLISECONDS)) {
-              @Override
-              public long extractTimestamp(SqlEvent element) {
-                // Prevents connected data+update stream watermark stalling.
-                return Long.MAX_VALUE;
-              }
-            });
+            .flatMap(new SqlDeserializer())
+            .name("SQL Deserialization")
+            .setParallelism(SQLS_STREAM_PARALLELISM)
+            .map(sqlEvent -> {
+              // 在 flatMap 后添加日志，记录解析结果
+              System.out.println("Deserialized SqlEvent: " + sqlEvent);
+              return sqlEvent;
+            })
+            .assignTimestampsAndWatermarks(
+                    new BoundedOutOfOrdernessTimestampExtractor<SqlEvent>(
+                            Time.of(0, TimeUnit.MILLISECONDS)) {
+                      @Override
+                      public long extractTimestamp(SqlEvent element) {
+                        // Prevents connected data+update stream watermark stalling.
+                        System.out.println("Assigned timestamp for SqlEvent: " + element.sqlQuery + " -> " + Long.MAX_VALUE);
+                        return Long.MAX_VALUE;
+                      }
+                    });
   }
+
 
   public enum Type {
     KAFKA("Rules Source (Kafka)"),

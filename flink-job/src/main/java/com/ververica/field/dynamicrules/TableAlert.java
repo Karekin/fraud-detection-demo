@@ -21,7 +21,10 @@ package com.ververica.field.dynamicrules;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.StringData;
 import org.apache.flink.types.Row;
 
 @Data
@@ -32,9 +35,22 @@ public class TableAlert {
     private Boolean isAdded;
     private Object[] response;
     private Long timestamp;
-    public static TableAlert fromTuple(Tuple4<String, Boolean, Row, Long> el) {
-        Object[] resp = new Object[el.f2.getArity()];
-        for (int i = 0; i < resp.length; i++) resp[i] = el.f2.getField(i);
-        return new TableAlert(el.f0, el.f1, resp, el.f3);
+    public static TableAlert fromTuple(Tuple3<String, RowData, Long> el) {
+        RowData rowData = el.f1;
+        StringData sqlData = rowData.getString(0);
+        String sql = sqlData.toString();
+
+        boolean isAdded = rowData.getBoolean(1);
+
+        int numElements = 4;  // 假设你知道 `response` Row 包含4个字段 TODO numElements 是什么？
+        RowData responseRow = rowData.getRow(2, numElements); // numElements 是这个 RowData 中字段的数量
+        Object[] response = new Object[responseRow.getArity()];
+        for (int i = 0; i < responseRow.getArity(); i++) {
+            response[i] = responseRow.getString(i).toString();  // 假设每个子字段都是 String 类型
+        }
+
+        long timestamp = rowData.getLong(3);
+
+        return new TableAlert(sql, isAdded, response, timestamp);
     }
 }

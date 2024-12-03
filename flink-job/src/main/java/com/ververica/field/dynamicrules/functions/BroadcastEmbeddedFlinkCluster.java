@@ -31,10 +31,12 @@ import org.apache.flink.table.api.Expressions;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 //import org.apache.flink.table.client.gateway.Executor;
+import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImpl;
 import org.apache.flink.table.client.gateway.Executor;
 import org.apache.flink.table.client.gateway.ResultDescriptor;
 import org.apache.flink.table.client.gateway.TypedResult;
 import org.apache.flink.table.client.gateway.context.DefaultContext;
+import org.apache.flink.table.client.gateway.context.ExecutionContext;
 import org.apache.flink.table.client.gateway.context.SessionContext;
 import org.apache.flink.table.client.gateway.local.LocalExecutor;
 import org.apache.flink.table.data.RowData;
@@ -94,8 +96,7 @@ public class BroadcastEmbeddedFlinkCluster<IN> implements Serializable {
 
     public void open(int dsSourcePort) throws Exception {
         customLogger.log("Opening new cluster - communicating on port " + dsSourcePort);
-        miniClusterResource =
-                new MiniClusterWithClientResource(
+        miniClusterResource = new MiniClusterWithClientResource(
                         new MiniClusterResourceConfiguration.Builder()
                                 .setConfiguration(getConfig())
                                 .setNumberTaskManagers(NUM_TMS)
@@ -117,11 +118,8 @@ public class BroadcastEmbeddedFlinkCluster<IN> implements Serializable {
 
         Runtime.getRuntime().addShutdownHook(new EmbeddedShutdownThread(sessionId, executor));
 
-        StreamExecutionEnvironment keyEnv =
-                (StreamExecutionEnvironment)
-                        FieldUtils.readField(executor.getExecutionContext(sessionId), "streamExecEnv", true);
-        tableEnv =
-                (StreamTableEnvironment) executor.getExecutionContext(sessionId).getTableEnvironment();
+        StreamExecutionEnvironment keyEnv =  StreamExecutionEnvironment.getExecutionEnvironment();
+        tableEnv = executor.getExecutionContext(sessionId).getTableEnvironment();
 
         String dsSourceHostName = "localhost";
 
@@ -161,7 +159,7 @@ public class BroadcastEmbeddedFlinkCluster<IN> implements Serializable {
         customLogger.log("Executing SQL :" + sql);
 
         // 执行 SQL 查询
-        Table result = tableEnv.sqlQuery("SELECT user_id, COUNT(product_id) AS product_count FROM input_table GROUP BY user_id");
+        Table result = tableEnv.sqlQuery(sql);
         QueryOperation queryOperation = result.getQueryOperation();
 
         resultDescriptor = executor.executeQuery(sessionId, queryOperation);
