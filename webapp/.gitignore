@@ -60,3 +60,5 @@ node_modules/
 
 # Temporary
 .npmrc
+
+/src/main/resources
