@@ -1,7 +1,9 @@
+日志调不好，暂时用虚拟机参数解决
+-Dlog4j.configurationFile=target/classes/log4j2.properties
+
 # Dynamic Fraud Detection Demo with Apache Flink
 
 ## Introduction
-
 
 ### Instructions (local execution with netcat):
 
