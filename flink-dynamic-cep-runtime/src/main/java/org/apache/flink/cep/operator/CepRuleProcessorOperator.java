@@ -14,6 +14,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.cep.EventComparator;
 import org.apache.flink.cep.configuration.ObjectConfiguration;
 import org.apache.flink.cep.configuration.SharedBufferCacheConfig;
+import org.apache.flink.cep.context.RuleAwareContext;
 import org.apache.flink.cep.dynamic.impl.json.util.CepJsonUtils;
 import org.apache.flink.cep.event.EventRecord;
 import org.apache.flink.cep.event.RuleUpdated;
@@ -479,6 +480,7 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
     private void processMatchedSequences(CepRuleProcessor processor, Iterable<Map<String, List<IN>>> matchingSequences, long timestamp) throws Exception {
 
         setTimestamp(timestamp);
+        setRule(processor.getRule());
         for (Map<String, List<IN>> matchingSequence : matchingSequences) {
             processor.function.processMatch(matchingSequence, context, collector);
         }
@@ -508,6 +510,10 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
         context.setTimestamp(timestamp);
     }
 
+    private void setRule(RuleUpdated rule) {
+        context.setCurrentRule(rule);
+    }
+
     /**
      * Gives {@link NFA} access to {@link InternalTimerService} and tells if {@link CepOperator}
      * works in processing time. Should be instantiated once per operator.
@@ -531,9 +537,10 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
      *       Processing or Event time
      * </ul>
      */
-    private class ContextFunctionImpl implements PatternProcessFunction.Context {
+    private class ContextFunctionImpl implements RuleAwareContext {
 
         private Long timestamp;
+        private RuleUpdated currentRule;
 
         @Override
         public <X> void output(final OutputTag<X> outputTag, final X value) {
@@ -553,6 +560,15 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
         @Override
         public long timestamp() {
             return timestamp;
+        }
+
+        @Override
+        public RuleUpdated getCurrentRule() {
+            return currentRule;
+        }
+
+        public void setCurrentRule(RuleUpdated currentRule) {
+            this.currentRule = currentRule;
         }
 
         @Override
@@ -672,6 +688,9 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
             function = null;
         }
 
+        public RuleUpdated getRule() {
+            return rule;
+        }
     }
 
 }

@@ -157,7 +157,7 @@ public class RulesEvaluator {
         DataStream<Transaction> transactions = getTransactionsStream(env);
 
         // TODO 还没有实现.process(new DynamicKeyFunction()) 动态分区的能力
-        SingleOutputStreamOperator<Transaction> alerts = CEPUtils.dynamicCepRules(
+        SingleOutputStreamOperator<Alert> alerts = CEPUtils.dynamicCepRules(
                 transactions.keyBy((KeySelector<Transaction, Long>) Transaction::getTransactionId),
                 new JdbcPeriodicRuleDiscovererFactory(
                         JdbcConnectorOptions.builder()
@@ -172,47 +172,47 @@ public class RulesEvaluator {
                         Collections.emptyList(),
                         Duration.ofSeconds(20).toMillis()),
                 TimeBehaviour.ProcessingTime,
-                TypeInformation.of(Transaction.class),
+                TypeInformation.of(Alert.class),
                 "cep-test",
                 "/",
                 false
         );
-        transactions.print("Generated Event-> ");
-        alerts.print("符合cep-> ");
+//        transactions.print("Generated Event-> ");
+//        alerts.print("符合cep-> ");
 
-//        // 从侧输出流中获取不同类型的数据
-//        DataStream<String> allRuleEvaluations = alerts.getSideOutput(Descriptors.demoSinkTag); // 规则评估输出
-//        DataStream<Long> latency = alerts.getSideOutput(Descriptors.latencySinkTag); // 延迟数据输出
-//        DataStream<Rule> currentRules = alerts.getSideOutput(Descriptors.currentRulesSinkTag); // 当前规则输出
-//
-//        // 打印警报流到控制台
-//        alerts.print().name("Alert STDOUT Sink");
-//
-//        // 打印规则评估流到控制台
-//        allRuleEvaluations.print().setParallelism(1).name("Rule Evaluation Sink");
-//
-//        // 转换为 JSON 格式的警报和规则流
-//        DataStream<String> alertsJson = AlertsSink.alertsStreamToJson(alerts);
-//        DataStream<String> currentRulesJson = CurrentRulesSink.rulesStreamToJson(currentRules);
-//
-//        currentRulesJson.print();
-//
-//        // 将警报流输出到外部接收器
-//        DataStreamSink<String> alertsSink = AlertsSink.addAlertsSink(config, alertsJson);
-//        alertsSink.setParallelism(1).name("Alerts JSON Sink");
-//
-//        // 将当前规则流输出到外部接收器
-//        DataStreamSink<String> currentRulesSink = CurrentRulesSink.addRulesSink(config, currentRulesJson);
-//        currentRulesSink.setParallelism(1);
-//
-//        // 计算并输出延迟信息
-//        DataStream<String> latencies = latency
-//                .timeWindowAll(Time.seconds(10))
-//                .aggregate(new AverageAggregate())
-//                .map(String::valueOf);
-//
-//        DataStreamSink<String> latencySink = LatencySink.addLatencySink(config, latencies);
-//        latencySink.name("Latency Sink");
+        // 从侧输出流中获取不同类型的数据
+        DataStream<String> allRuleEvaluations = alerts.getSideOutput(Descriptors.demoSinkTag); // 规则评估输出
+        DataStream<Long> latency = alerts.getSideOutput(Descriptors.latencySinkTag); // 延迟数据输出
+        DataStream<Rule> currentRules = alerts.getSideOutput(Descriptors.currentRulesSinkTag); // 当前规则输出
+
+        // 打印警报流到控制台
+        alerts.print().name("Alert STDOUT Sink");
+
+        // 打印规则评估流到控制台
+        allRuleEvaluations.print().setParallelism(1).name("Rule Evaluation Sink");
+
+        // 转换为 JSON 格式的警报和规则流
+        DataStream<String> alertsJson = AlertsSink.alertsStreamToJson(alerts);
+        DataStream<String> currentRulesJson = CurrentRulesSink.rulesStreamToJson(currentRules);
+
+        currentRulesJson.print();
+
+        // 将警报流输出到外部接收器
+        DataStreamSink<String> alertsSink = AlertsSink.addAlertsSink(config, alertsJson);
+        alertsSink.setParallelism(1).name("Alerts JSON Sink");
+
+        // 将当前规则流输出到外部接收器
+        DataStreamSink<String> currentRulesSink = CurrentRulesSink.addRulesSink(config, currentRulesJson);
+        currentRulesSink.setParallelism(1);
+
+        // 计算并输出延迟信息
+        DataStream<String> latencies = latency
+                .timeWindowAll(Time.seconds(10))
+                .aggregate(new AverageAggregate())
+                .map(String::valueOf);
+
+        DataStreamSink<String> latencySink = LatencySink.addLatencySink(config, latencies);
+        latencySink.name("Latency Sink");
 
         // 执行 Flink 作业
         env.execute("Fraud Detection Engine");
