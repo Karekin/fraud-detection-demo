@@ -99,11 +99,11 @@
       <version>3.3.0-1.19</version>
     </dependency>
 
-<!--    <dependency>-->
-<!--      <groupId>org.apache.kafka</groupId>-->
-<!--      <artifactId>kafka-clients</artifactId>-->
-<!--      <version>3.3.0</version> &lt;!&ndash; 确保与 Flink 兼容 &ndash;&gt;-->
-<!--    </dependency>-->
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>3.3.0</version> <!-- 确保与 Flink 兼容 -->
+    </dependency>
 
     <dependency>
       <groupId>org.apache.flink</groupId>
