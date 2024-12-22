@@ -3,18 +3,18 @@ package com.ververica.field.engine.threshold;
 import static com.ververica.field.config.Parameters.*;
 
 import com.ververica.field.config.Config;
+import com.ververica.field.engine.pattern.discover.JdbcPeriodicRuleDiscovererFactory;
 import com.ververica.field.functions.*;
 import com.ververica.field.functions.AverageAggregate;
 import com.ververica.field.functions.DynamicAlertFunction;
 import com.ververica.field.functions.DynamicKeyFunction;
-import com.ververica.field.model.Alert;
-import com.ververica.field.model.Keyed;
-import com.ververica.field.model.Rule;
-import com.ververica.field.model.Transaction;
+import com.ververica.field.model.*;
 import com.ververica.field.sinks.*;
 import com.ververica.field.sources.*;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import com.ververica.field.sinks.AlertsSink;
@@ -27,8 +27,12 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.cep.CEPUtils;
+import org.apache.flink.cep.TimeBehaviour;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.jdbc.internal.options.JdbcConnectorOptions;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -54,7 +58,7 @@ public class RulesEvaluator {
     /**
      * 执行主要流程，包括环境配置、数据流构建和作业执行。
      */
-    public void run() throws Exception {
+    public void runDynamicThreshold() throws Exception {
 
         RulesSource.Type rulesSourceType = getRulesSourceType(); // 获取规则源类型。
         boolean isLocal = config.get(LOCAL_EXECUTION); // 判断是否为本地执行模式。
@@ -72,19 +76,7 @@ public class RulesEvaluator {
 
         // 创建规则更新流和交易流
         DataStream<Rule> rulesUpdateStream = getRulesUpdateStream(env);
-        rulesUpdateStream.map(rule -> {
-            System.out.println("Consumed rule: " + rule);
-            return rule;
-        }).print();
-
-        rulesUpdateStream.print();
         DataStream<Transaction> transactions = getTransactionsStream(env);
-        transactions.map(tx -> {
-            System.out.println("Consumed transaction: " + tx);
-            return tx;
-        }).print();
-
-        transactions.print();
 
         // 广播规则流
         BroadcastStream<Rule> rulesStream = rulesUpdateStream.broadcast(Descriptors.rulesDescriptor);
@@ -139,6 +131,88 @@ public class RulesEvaluator {
 
         DataStreamSink<String> latencySink = LatencySink.addLatencySink(config, latencies);
         latencySink.name("Latency Sink");
+
+        // 执行 Flink 作业
+        env.execute("Fraud Detection Engine");
+    }
+
+
+    public void runDynamicPattern() throws Exception {
+
+        RulesSource.Type rulesSourceType = getRulesSourceType(); // 获取规则源类型。
+        boolean isLocal = config.get(LOCAL_EXECUTION); // 判断是否为本地执行模式。
+        boolean enableCheckpoints = config.get(ENABLE_CHECKPOINTS); // 检查点是否启用。
+        int checkpointsInterval = config.get(CHECKPOINT_INTERVAL); // 检查点间隔时间。
+        int minPauseBtwnCheckpoints = config.get(MIN_PAUSE_BETWEEN_CHECKPOINTS); // 检查点最小间隔。
+
+        // 配置 Flink 执行环境
+        StreamExecutionEnvironment env = configureStreamExecutionEnvironment(rulesSourceType, isLocal);
+
+        if (enableCheckpoints) {
+            env.enableCheckpointing(checkpointsInterval); // 启用检查点
+            env.getCheckpointConfig().setMinPauseBetweenCheckpoints(minPauseBtwnCheckpoints); // 设置检查点间隔
+        }
+
+        // 创建规则更新流和交易流
+        DataStream<Transaction> transactions = getTransactionsStream(env);
+
+        // TODO 还没有实现.process(new DynamicKeyFunction()) 动态分区的能力
+        SingleOutputStreamOperator<Transaction> alerts = CEPUtils.dynamicCepRules(
+                transactions.keyBy((KeySelector<Transaction, Long>) Transaction::getTransactionId),
+                new JdbcPeriodicRuleDiscovererFactory(
+                        JdbcConnectorOptions.builder()
+                                .setTableName("public.cep_rules")
+                                .setDriverName("org.postgresql.Driver")
+                                .setDBUrl("jdbc:postgresql://127.0.0.1:5432/riskcontrol")
+                                .setUsername("root")
+                                .setPassword("root")
+                                .build(),
+                        1000,
+                        "cep",
+                        Collections.emptyList(),
+                        Duration.ofSeconds(20).toMillis()),
+                TimeBehaviour.ProcessingTime,
+                TypeInformation.of(Transaction.class),
+                "cep-test",
+                "/",
+                false
+        );
+        transactions.print("Generated Event-> ");
+        alerts.print("符合cep-> ");
+
+//        // 从侧输出流中获取不同类型的数据
+//        DataStream<String> allRuleEvaluations = alerts.getSideOutput(Descriptors.demoSinkTag); // 规则评估输出
+//        DataStream<Long> latency = alerts.getSideOutput(Descriptors.latencySinkTag); // 延迟数据输出
+//        DataStream<Rule> currentRules = alerts.getSideOutput(Descriptors.currentRulesSinkTag); // 当前规则输出
+//
+//        // 打印警报流到控制台
+//        alerts.print().name("Alert STDOUT Sink");
+//
+//        // 打印规则评估流到控制台
+//        allRuleEvaluations.print().setParallelism(1).name("Rule Evaluation Sink");
+//
+//        // 转换为 JSON 格式的警报和规则流
+//        DataStream<String> alertsJson = AlertsSink.alertsStreamToJson(alerts);
+//        DataStream<String> currentRulesJson = CurrentRulesSink.rulesStreamToJson(currentRules);
+//
+//        currentRulesJson.print();
+//
+//        // 将警报流输出到外部接收器
+//        DataStreamSink<String> alertsSink = AlertsSink.addAlertsSink(config, alertsJson);
+//        alertsSink.setParallelism(1).name("Alerts JSON Sink");
+//
+//        // 将当前规则流输出到外部接收器
+//        DataStreamSink<String> currentRulesSink = CurrentRulesSink.addRulesSink(config, currentRulesJson);
+//        currentRulesSink.setParallelism(1);
+//
+//        // 计算并输出延迟信息
+//        DataStream<String> latencies = latency
+//                .timeWindowAll(Time.seconds(10))
+//                .aggregate(new AverageAggregate())
+//                .map(String::valueOf);
+//
+//        DataStreamSink<String> latencySink = LatencySink.addLatencySink(config, latencies);
+//        latencySink.name("Latency Sink");
 
         // 执行 Flink 作业
         env.execute("Fraud Detection Engine");

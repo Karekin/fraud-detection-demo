@@ -61,7 +61,7 @@ public class Transaction implements TimestampAssignable<Long> {
         CRD("CRD");  // 信用卡支付
 
         // 支付类型的字符串表示
-        String representation;
+        final String representation;
 
         // 构造函数
         PaymentType(String repr) {

@@ -1,76 +1,44 @@
 package com.ververica.field;
 
-import com.ververica.field.engine.pattern.discover.JdbcPeriodicRuleDiscovererFactory;
-import com.ververica.field.model.DeviceEvent;
-import com.ververica.field.sources.MyDeviceEventSource;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
+import com.ververica.field.config.Config;
+import com.ververica.field.config.Parameters;
+import com.ververica.field.engine.threshold.RulesEvaluator;
+import org.apache.flink.api.java.utils.ParameterTool;
 
-import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.cep.CEPUtils;
-import org.apache.flink.cep.TimeBehaviour;
-import org.apache.flink.connector.jdbc.internal.options.JdbcConnectorOptions;
-
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-import java.time.Duration;
-import java.util.Collections;
+import static com.ververica.field.config.Parameters.*;
 
 /**
  * Flink CEP 引擎支持动态多规则示例
  *
- * @author shirukai
+ * 主程序类，程序入口。
+ * 该类负责从命令行参数读取配置，并使用这些配置启动规则评估器（RulesEvaluator）。
  */
 public class DynamicPatternApplication {
+
+    /**
+     * 程序的主入口方法。
+     * 1. 解析命令行参数。
+     * 2. 初始化`Config`对象并加载相关参数。
+     * 3. 使用配置启动`RulesEvaluator`，并执行规则评估任务。
+     *
+     * @param args 命令行传入的参数
+     * @throws Exception 如果在执行过程中发生任何异常，将被抛出
+     */
     public static void main(String[] args) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
 
-        DataStreamSource<DeviceEvent> events = env.addSource(new MyDeviceEventSource());
+        // 使用ParameterTool从命令行参数中读取配置
+        ParameterTool tool = ParameterTool.fromArgs(args);
 
-//        DataStream<DeviceEvent> events = env.fromElements(
-//                new DeviceEvent("device-1", 1, 50.0, 5600L, 1705307073000L), // 2024-01-15 12:00:00
-//                new DeviceEvent("device-1", 1, 56.4, 6430L, 1705307080000L), // 2024-01-15 12:00:40
-//                new DeviceEvent("device-1", 1, 60.8, 6670L, 1705307085000L), // 2024-01-15 12:01:25
-//                new DeviceEvent("device-1", 0, 60.8, 6670L, 1705307205000L)  // 2024-01-15 12:06:45
-//        ).returns(TypeInformation.of(DeviceEvent.class));
+        // 将命令行参数转换为Parameters对象
+        Parameters inputParams = new Parameters(tool);
 
-//
-//        // 分配时间戳和水印
-//        events = events.assignTimestampsAndWatermarks(
-//                WatermarkStrategy.<Row>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-//                        .withTimestampAssigner((event, timestamp) -> event.getFieldAs("detection_time"))
-//        );
+        // 使用输入的Parameters对象、字符串参数、整数参数和布尔参数初始化Config对象
+        Config config = new Config(inputParams, STRING_PARAMS, INT_PARAMS, BOOL_PARAMS);
 
+        // 创建规则评估器对象并启动规则评估
+        RulesEvaluator rulesEvaluator = new RulesEvaluator(config);
 
-        SingleOutputStreamOperator<DeviceEvent> alarms = CEPUtils.dynamicCepRules(
-                events.keyBy((KeySelector<DeviceEvent, String>) DeviceEvent::getId),
-                new JdbcPeriodicRuleDiscovererFactory(
-                        JdbcConnectorOptions.builder()
-                                .setTableName("public.cep_rules")
-                                .setDriverName("org.postgresql.Driver")
-                                .setDBUrl("jdbc:postgresql://127.0.0.1:5432/riskcontrol")
-                                .setUsername("root")
-                                .setPassword("root")
-                                .build(),
-                        1000,
-                        "cep",
-                        Collections.emptyList(),
-                        Duration.ofSeconds(20).toMillis()),
-                TimeBehaviour.ProcessingTime,
-                TypeInformation.of(DeviceEvent.class),
-                "cep-test",
-                "/",
-                false
-        );
-
-//        events.print();
-
-        alarms.print("符合cep-> ");
-
-        env.execute("DynamicCepExamples");
-
+        // 执行规则评估
+        rulesEvaluator.runDynamicPattern();
     }
-
 }

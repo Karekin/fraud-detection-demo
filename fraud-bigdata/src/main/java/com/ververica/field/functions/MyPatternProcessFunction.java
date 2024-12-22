@@ -1,6 +1,6 @@
 package com.ververica.field.functions;
 
-import com.ververica.field.model.DeviceEvent;
+import com.ververica.field.model.Transaction;
 import org.apache.flink.cep.functions.PatternProcessFunction;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author shirukai
  */
-public class MyPatternProcessFunction extends PatternProcessFunction<DeviceEvent, DeviceEvent> {
+public class MyPatternProcessFunction extends PatternProcessFunction<Transaction, Transaction> {
     private static final ConfigOption<Double> TEMP_THRESHOLD = ConfigOptions.key("temp_threshold")
             .doubleType().defaultValue(100.0);
 
@@ -31,31 +31,59 @@ public class MyPatternProcessFunction extends PatternProcessFunction<DeviceEvent
         rpmThreshold = parameters.get(RPM_THRESHOLD);
     }
 
+//    @Override
+//    public void processMatch(
+//            Map<String, List<Transaction>> match,
+//            Context ctx,
+//            Collector<Transaction> out) throws Exception {
+//        List<Transaction> events = match.get("start");
+//        if (events == null || events.isEmpty()) {
+//            return;
+//        }
+//
+//        // 1. 计算均值
+//        double rpmAvg = events.stream().mapToDouble(Transaction::getRpm).average().orElse(0.0);
+//        double tempAvg = events.stream().mapToDouble(Transaction::getTemp).average().orElse(0.0);
+//
+//        // 2. 构造输出事件
+//        Transaction firstEvent = events.get(0);
+//        Transaction resultEvent = new Transaction(
+//                firstEvent.getId(),
+//                firstEvent.getAction(),
+//                tempAvg,
+//                (long) rpmAvg,
+//                firstEvent.getDetectionTime()
+//        );
+//
+//        // 3. 输出结果
+//        out.collect(resultEvent);
+//    }
+
     @Override
     public void processMatch(
-            Map<String, List<DeviceEvent>> match,
+            Map<String, List<Transaction>> match,
             Context ctx,
-            Collector<DeviceEvent> out) throws Exception {
-        List<DeviceEvent> events = match.get("start");
+            Collector<Transaction> out) throws Exception {
+        List<Transaction> events = match.get("start");
         if (events == null || events.isEmpty()) {
             return;
         }
 
         // 1. 计算均值
-        double rpmAvg = events.stream().mapToDouble(DeviceEvent::getRpm).average().orElse(0.0);
-        double tempAvg = events.stream().mapToDouble(DeviceEvent::getTemp).average().orElse(0.0);
+//        double rpmAvg = events.stream().mapToDouble(Transaction::getRpm).average().orElse(0.0);
+//        double tempAvg = events.stream().mapToDouble(Transaction::getTemp).average().orElse(0.0);
 
         // 2. 构造输出事件
-        DeviceEvent firstEvent = events.get(0);
-        DeviceEvent resultEvent = new DeviceEvent(
-                firstEvent.getId(),
-                firstEvent.getAction(),
-                tempAvg,
-                (long) rpmAvg,
-                firstEvent.getDetectionTime()
-        );
+        Transaction firstEvent = events.get(0);
+//        Transaction resultEvent = new Transaction(
+//                firstEvent.transactionId,
+//                firstEvent.g,
+//                tempAvg,
+//                (long) rpmAvg,
+//                firstEvent.getDetectionTime()
+//        );
 
         // 3. 输出结果
-        out.collect(resultEvent);
+        out.collect(firstEvent);
     }
 }

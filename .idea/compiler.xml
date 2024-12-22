@@ -18,7 +18,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../resource/apache-maven-3.8.6/RepositoryCommon/org/projectlombok/lombok/1.18.8/lombok-1.18.8.jar" />
+          <entry name="$PROJECT_DIR$/../../../resource/apache-maven-3.8.6/RepositoryCommon/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
         <module name="fraud-webapp" />
       </profile>

@@ -39,6 +39,6 @@ public class DynamicThresholdApplication {
         RulesEvaluator rulesEvaluator = new RulesEvaluator(config);
 
         // 执行规则评估
-        rulesEvaluator.run();
+        rulesEvaluator.runDynamicThreshold();
     }
 }
