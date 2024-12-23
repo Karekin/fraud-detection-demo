@@ -26,19 +26,45 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonPro
 import java.util.List;
 
 /**
- * This class is to (de)serialize {@link RichAndCondition} in json format.
+ * 用于将 {@link RichAndCondition} 序列化和反序列化为 JSON 格式的工具类。
+ *
+ * <p>该类继承自 {@link RichCompositeConditionSpec}，表示 AND 条件的规范，
+ * 支持对嵌套条件的逻辑与（AND）操作。
  */
 public class RichAndConditionSpec extends RichCompositeConditionSpec {
 
+    /**
+     * 构造方法。
+     *
+     * <p>通过 JSON 属性初始化 AND 条件的嵌套条件列表。
+     *
+     * @param nestedConditions AND 条件的嵌套条件列表
+     */
     public RichAndConditionSpec(
             @JsonProperty("nestedConditions") List<ConditionSpec> nestedConditions) {
+        // 调用父类构造方法，传递类名和嵌套条件列表
         super(RichAndCondition.class.getCanonicalName(), nestedConditions);
     }
 
+    /**
+     * 将条件规范转换为 {@link RichAndCondition} 实例。
+     *
+     * <p>通过加载嵌套条件的具体实现，并以 AND 的组合逻辑生成条件实例。
+     * AND 条件需要至少两个嵌套条件，分别通过索引 0 和索引 1 获取。
+     *
+     * @param classLoader 用于加载类的类加载器
+     * @param globalConfiguration 全局配置，用于传递参数
+     * @return 转换后的 {@link RichAndCondition} 实例
+     * @throws Exception 如果加载类或创建实例失败
+     */
     @Override
-    public IterativeCondition<?> toIterativeCondition(ClassLoader classLoader, Configuration globalConfiguration) throws Exception {
+    public IterativeCondition<?> toIterativeCondition(
+            ClassLoader classLoader, Configuration globalConfiguration) throws Exception {
+        // 创建 AND 条件实例，依赖两个嵌套条件
         return new RichAndCondition(
+                // 加载并转换第一个嵌套条件
                 this.getNestedConditions().get(0).toIterativeCondition(classLoader, globalConfiguration),
+                // 加载并转换第二个嵌套条件
                 this.getNestedConditions().get(1).toIterativeCondition(classLoader, globalConfiguration));
     }
 }

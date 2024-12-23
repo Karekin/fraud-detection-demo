@@ -17,7 +17,7 @@
  */
 
 package org.apache.flink.cep.dynamic.impl.json.spec;
-import org.apache.flink.cep.functions.AbstractCondition;
+import org.apache.flink.cep.dynamic.condition.AbstractCondition;
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;

@@ -21,26 +21,61 @@ package org.apache.flink.cep.dynamic.condition;
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
 
-/** Condition that accepts custom args in json. */
+/**
+ * 支持自定义参数的条件类。
+ *
+ * <p>该抽象类继承自 {@link SimpleCondition}，用于定义带有自定义参数的条件逻辑。
+ * 自定义参数以 JSON 格式传递，并通过子类实现具体的过滤逻辑。
+ *
+ * @param <T> 条件应用的事件类型
+ */
 @Internal
 public abstract class CustomArgsCondition<T> extends SimpleCondition<T> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L; // 序列化版本号，用于类版本兼容
 
-    /** The args of the condition. */
+    /**
+     * 条件的自定义参数。
+     *
+     * <p>这些参数以字符串数组形式存储，通常以 JSON 形式传递，用于在子类中定义
+     * 更复杂的条件逻辑。
+     */
     private final String[] args;
 
+    /**
+     * 实现条件逻辑的类名称。
+     *
+     * <p>该字段用于标识具体实现类，便于在反射或动态加载场景中使用。
+     */
     private final String className;
 
+    /**
+     * 构造方法。
+     *
+     * <p>初始化自定义参数和类名称。
+     *
+     * @param args 自定义参数数组
+     * @param className 实现条件逻辑的类名称
+     */
     public CustomArgsCondition(String[] args, String className) {
-        this.args = args;
-        this.className = className;
+        this.args = args; // 初始化自定义参数
+        this.className = className; // 初始化类名称
     }
 
+    /**
+     * 获取自定义参数。
+     *
+     * @return 自定义参数数组
+     */
     public String[] getArgs() {
         return args;
     }
 
+    /**
+     * 获取实现条件逻辑的类名称。
+     *
+     * @return 类名称
+     */
     public String getClassName() {
         return className;
     }

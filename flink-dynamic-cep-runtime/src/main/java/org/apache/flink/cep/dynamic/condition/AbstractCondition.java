@@ -1,4 +1,4 @@
-package org.apache.flink.cep.functions;
+package org.apache.flink.cep.dynamic.condition;
 
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.configuration.Configuration;

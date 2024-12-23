@@ -1,7 +1,7 @@
 package com.ververica.field.engine.pattern.condition;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.flink.cep.functions.AbstractCondition;
+import org.apache.flink.cep.dynamic.condition.AbstractCondition;
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
