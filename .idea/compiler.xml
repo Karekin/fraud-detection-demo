@@ -7,10 +7,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="demo-fraud-bigdata" />
         <module name="fraud-bigdata" />
         <module name="dynamic-cep-runtime" />
-        <module name="demo-fraud-webapp" />
         <module name="demo-module" />
       </profile>
       <profile name="Annotation profile for fraud-detection" enabled="true">
