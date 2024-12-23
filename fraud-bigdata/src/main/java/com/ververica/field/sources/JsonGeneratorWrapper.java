@@ -1,4 +1,4 @@
-package com.ververica.field.functions;
+package com.ververica.field.sources;
 
 import com.ververica.field.sources.BaseGenerator;
 

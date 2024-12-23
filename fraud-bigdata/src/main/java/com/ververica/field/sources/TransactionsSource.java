@@ -8,9 +8,7 @@ import com.ververica.field.config.Config;
 import com.ververica.field.engine.threshold.utils.KafkaUtils;
 import com.ververica.field.model.Transaction;
 import com.ververica.field.functions.JsonDeserializer;
-import com.ververica.field.functions.JsonGeneratorWrapper;
 import com.ververica.field.functions.TimeStamper;
-import com.ververica.field.functions.TransactionsGenerator;
 
 import java.util.Properties;
 

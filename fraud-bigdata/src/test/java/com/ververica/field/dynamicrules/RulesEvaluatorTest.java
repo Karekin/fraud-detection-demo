@@ -160,7 +160,7 @@ public class RulesEvaluatorTest {
                      testHarness =
                      BroadcastStreamKeyedOperatorTestHarness.getInitializedTestHarness(
                              new DynamicAlertFunction(),
-                             in -> (in.getKey()),
+                             Keyed::getKey,
                              null,
                              BasicTypeInfo.STRING_TYPE_INFO,
                              Descriptors.rulesDescriptor)) {
@@ -205,7 +205,7 @@ public class RulesEvaluatorTest {
                      testHarness =
                      BroadcastStreamKeyedOperatorTestHarness.getInitializedTestHarness(
                              new DynamicAlertFunction(),
-                             in -> (in.getKey()),
+                             Keyed::getKey,
                              null,
                              BasicTypeInfo.STRING_TYPE_INFO,
                              Descriptors.rulesDescriptor)) {

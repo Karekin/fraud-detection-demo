@@ -1,7 +1,7 @@
 package com.ververica.field.functions;
 
-import static com.ververica.field.functions.ProcessingUtils.addToStateValuesSet;
-import static com.ververica.field.functions.ProcessingUtils.handleRuleBroadcast;
+import static com.ververica.field.engine.threshold.utils.ProcessingUtils.addToStateValuesSet;
+import static com.ververica.field.engine.threshold.utils.ProcessingUtils.handleRuleBroadcast;
 
 import com.ververica.field.model.Alert;
 import com.ververica.field.engine.threshold.utils.FieldsExtractor;
@@ -32,7 +32,7 @@ import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction
 import org.apache.flink.util.Collector;
 
 /**
- * 实现动态规则评估和告警逻辑的核心类。
+ * 实现动态规则（动态阈值）评估和告警逻辑的核心类。
  * - 根据交易事件与广播规则进行评估。
  * - 动态生成告警，并清理过期状态。
  * - 支持控制命令的处理（如清理状态、导出规则等）。

@@ -1,6 +1,6 @@
 package com.ververica.field.functions;
 
-import static com.ververica.field.functions.ProcessingUtils.handleRuleBroadcast;
+import static com.ververica.field.engine.threshold.utils.ProcessingUtils.handleRuleBroadcast;
 
 import com.ververica.field.model.Keyed;
 import com.ververica.field.engine.threshold.utils.KeysExtractor;

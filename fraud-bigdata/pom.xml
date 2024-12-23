@@ -12,13 +12,22 @@
   <artifactId>fraud-bigdata</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <lombok.version>1.18.30</lombok.version>
+  </properties>
+
   <dependencies>
-      <dependency>
-          <groupId>com.karekin</groupId>
-          <artifactId>flink-dynamic-cep-runtime</artifactId>
-          <version>1.0</version>
-          <scope>compile</scope>
-      </dependency>
+    <dependency>
+        <groupId>com.karekin</groupId>
+        <artifactId>flink-dynamic-cep-runtime</artifactId>
+        <version>1.0</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
   </dependencies>
 
 

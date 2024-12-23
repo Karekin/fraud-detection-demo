@@ -1,4 +1,4 @@
-package com.ververica.field.functions;
+package com.ververica.field.engine.threshold.utils;
 
 import com.ververica.field.model.Rule;
 
@@ -12,7 +12,7 @@ import org.apache.flink.api.common.state.MapState;
  * 处理动态规则和状态操作的实用工具类。
  * 提供对广播状态和 MapState 的操作方法。
  */
-class ProcessingUtils {
+public class ProcessingUtils {
 
     /**
      * 根据规则的状态，处理规则的广播操作。
@@ -21,7 +21,7 @@ class ProcessingUtils {
      * @param broadcastState Flink 的广播状态，用于存储和更新规则
      * @throws Exception 如果广播状态更新失败
      */
-    static void handleRuleBroadcast(Rule rule, BroadcastState<Integer, Rule> broadcastState)
+    public static void handleRuleBroadcast(Rule rule, BroadcastState<Integer, Rule> broadcastState)
             throws Exception {
         // 根据规则的状态执行不同的操作
         switch (rule.getRuleState()) {
@@ -47,7 +47,7 @@ class ProcessingUtils {
      * @return 更新后的值集合
      * @throws Exception 如果状态更新失败
      */
-    static <K, V> Set<V> addToStateValuesSet(MapState<K, Set<V>> mapState, K key, V value)
+    public static <K, V> Set<V> addToStateValuesSet(MapState<K, Set<V>> mapState, K key, V value)
             throws Exception {
         // 获取键对应的值集合
         Set<V> valuesSet = mapState.get(key);
