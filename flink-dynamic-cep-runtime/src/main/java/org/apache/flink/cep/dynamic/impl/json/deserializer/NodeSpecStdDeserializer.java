@@ -28,41 +28,76 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.deser.std
 import java.io.IOException;
 
 /**
- * The customized StdDeserializer for NodeSpec.
+ * 自定义的 {@link StdDeserializer}，用于反序列化 {@link NodeSpec}。
+ *
+ * <p>该类负责将 JSON 数据解析为 {@link NodeSpec} 或 {@link GroupNodeSpec} 对象，
+ * 根据节点类型（`type`）决定具体的实例化逻辑。
  */
 public class NodeSpecStdDeserializer extends StdDeserializer<NodeSpec> {
 
+    /** 单例实例，避免重复创建。 */
     public static final NodeSpecStdDeserializer INSTANCE = new NodeSpecStdDeserializer();
+
     private static final long serialVersionUID = 1L;
 
+    /** 默认构造方法。 */
     public NodeSpecStdDeserializer() {
         this(null);
     }
 
+    /**
+     * 参数化构造方法。
+     *
+     * @param vc 需要反序列化的目标类型
+     */
     public NodeSpecStdDeserializer(Class<?> vc) {
         super(vc);
     }
 
+    /**
+     * 反序列化方法。
+     *
+     * <p>根据 JSON 数据的节点类型（`type`）反序列化为 {@link NodeSpec} 或 {@link GroupNodeSpec}。
+     *
+     * @param jsonParser JSON 解析器
+     * @param deserializationContext 反序列化上下文
+     * @return 解析后的 {@link NodeSpec} 实例
+     * @throws IOException 如果解析过程中发生 I/O 错误
+     */
     @Override
     public NodeSpec deserialize(
             JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException {
+        // 读取 JSON 数据节点
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+
+        // 获取节点的类型（ATOMIC 或 COMPOSITE）
         NodeSpec.PatternNodeType type = NodeSpec.PatternNodeType.valueOf(node.get("type").asText());
+
+        // 解析节点名称
         String name = node.get("name").asText();
+
+        // 解析量化器规则
         QuantifierSpec quantifierSpec =
                 jsonParser.getCodec().treeToValue(node.get("quantifier"), QuantifierSpec.class);
+
+        // 解析匹配条件规则
         ConditionSpec conditionSpec =
                 jsonParser.getCodec().treeToValue(node.get("condition"), ConditionSpec.class);
 
+        // 解析匹配次数规则（可选）
         TimesSpec times =
                 jsonParser.getCodec().treeToValue(node.get("times"), TimesSpec.class);
 
+        // 解析直到条件规则（可选）
         ConditionSpec untilConditionSpec =
                 jsonParser.getCodec().treeToValue(node.get("untilCondition"), ConditionSpec.class);
 
+        // 解析窗口规则
         WindowSpec window =
                 jsonParser.getCodec().treeToValue(node.get("window"), WindowSpec.class);
+
+        // 解析匹配后跳过策略
         AfterMatchSkipStrategySpec afterMatchSkipStrategy =
                 jsonParser
                         .getCodec()
@@ -70,9 +105,12 @@ public class NodeSpecStdDeserializer extends StdDeserializer<NodeSpec> {
                                 node.get("afterMatchSkipStrategy"),
                                 AfterMatchSkipStrategySpec.class);
 
+        // 根据节点类型实例化具体的节点对象
         if (type.equals(NodeSpec.PatternNodeType.COMPOSITE)) {
+            // 解析嵌套图（GraphSpec）
             GraphSpec graph = jsonParser.getCodec().treeToValue(node.get("graph"), GraphSpec.class);
 
+            // 创建组节点（GroupNodeSpec）
             return new GroupNodeSpec(
                     name,
                     quantifierSpec,
@@ -83,7 +121,16 @@ public class NodeSpecStdDeserializer extends StdDeserializer<NodeSpec> {
                     window,
                     afterMatchSkipStrategy);
         } else {
-            return new NodeSpec(name, quantifierSpec, conditionSpec, times, untilConditionSpec, window, afterMatchSkipStrategy);
+            // 创建普通节点（NodeSpec）
+            return new NodeSpec(
+                    name,
+                    quantifierSpec,
+                    conditionSpec,
+                    times,
+                    untilConditionSpec,
+                    window,
+                    afterMatchSkipStrategy);
         }
     }
 }
+
