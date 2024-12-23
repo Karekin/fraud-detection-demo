@@ -7,9 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="flink-dynamic-cep-runtime" />
         <module name="demo-fraud-bigdata" />
         <module name="fraud-bigdata" />
+        <module name="dynamic-cep-runtime" />
         <module name="demo-fraud-webapp" />
         <module name="demo-module" />
       </profile>
@@ -33,7 +33,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="demo-fraud-bigdata" options="-parameters" />
       <module name="demo-fraud-webapp" options="-parameters" />
-      <module name="flink-dynamic-cep-runtime" options="-parameters" />
+      <module name="dynamic-cep-runtime" options="-parameters" />
       <module name="fraud-bigdata" options="-parameters" />
       <module name="fraud-detection" options="-parameters" />
       <module name="fraud-detection-demo" options="-parameters" />

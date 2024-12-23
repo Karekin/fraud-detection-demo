@@ -6,8 +6,8 @@
     <file url="file://$PROJECT_DIR$/demo-fraud-webapp/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/demo-module/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/demo-module/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/flink-dynamic-cep-runtime/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/flink-dynamic-cep-runtime/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dynamic-cep-runtime/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dynamic-cep-runtime/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/fraud-bigdata/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/fraud-webapp/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

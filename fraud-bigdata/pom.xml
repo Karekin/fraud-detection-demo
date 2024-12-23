@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
         <groupId>com.karekin</groupId>
-        <artifactId>flink-dynamic-cep-runtime</artifactId>
+        <artifactId>dynamic-cep-runtime</artifactId>
         <version>1.0</version>
         <scope>compile</scope>
     </dependency>

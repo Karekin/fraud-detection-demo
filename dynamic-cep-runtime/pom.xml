@@ -12,7 +12,7 @@
 
     <version>1.0</version>
     <packaging>jar</packaging>
-    <artifactId>flink-dynamic-cep-runtime</artifactId>
+    <artifactId>dynamic-cep-runtime</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

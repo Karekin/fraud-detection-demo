@@ -19,7 +19,7 @@
     <modules>
         <module>fraud-webapp</module>
         <module>fraud-bigdata</module>
-        <module>flink-dynamic-cep-runtime</module>
+        <module>dynamic-cep-runtime</module>
     </modules>
 
     <properties>
