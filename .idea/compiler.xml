@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="demo-fraud-bigdata" />
+        <module name="fraud-bigdata" />
+        <module name="dynamic-cep-runtime" />
+        <module name="demo-fraud-webapp" />
+        <module name="demo-module" />
+      </profile>
+      <profile name="Annotation profile for fraud-detection" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../../../resource/apache-maven-3.8.6/RepositoryCommon/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
+        </processorPath>
+        <module name="fraud-webapp" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="demo-fraud-bigdata" target="1.8" />
+      <module name="demo-fraud-webapp" target="1.8" />
+      <module name="fraud-detection-demo" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="demo-fraud-bigdata" options="-parameters" />
+      <module name="demo-fraud-webapp" options="-parameters" />
+      <module name="dynamic-cep-runtime" options="-parameters" />
+      <module name="fraud-bigdata" options="-parameters" />
+      <module name="fraud-detection" options="-parameters" />
+      <module name="fraud-detection-demo" options="-parameters" />
+      <module name="fraud-webapp" options="-parameters" />
+    </option>
+  </component>
+</project>
