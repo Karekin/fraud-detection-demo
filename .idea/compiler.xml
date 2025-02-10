@@ -7,20 +7,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="fraud-webapp" />
         <module name="demo-fraud-bigdata" />
         <module name="fraud-bigdata" />
         <module name="dynamic-cep-runtime" />
         <module name="demo-fraud-webapp" />
         <module name="demo-module" />
-      </profile>
-      <profile name="Annotation profile for fraud-detection" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../resource/apache-maven-3.8.6/RepositoryCommon/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
-        </processorPath>
-        <module name="fraud-webapp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -33,9 +25,9 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="demo-fraud-bigdata" options="-parameters" />
       <module name="demo-fraud-webapp" options="-parameters" />
-      <module name="dynamic-cep-runtime" options="-parameters" />
-      <module name="fraud-bigdata" options="-parameters" />
-      <module name="fraud-detection" options="-parameters" />
+      <module name="dynamic-cep-runtime" options="" />
+      <module name="fraud-bigdata" options="" />
+      <module name="fraud-detection" options="" />
       <module name="fraud-detection-demo" options="-parameters" />
       <module name="fraud-webapp" options="-parameters" />
     </option>
