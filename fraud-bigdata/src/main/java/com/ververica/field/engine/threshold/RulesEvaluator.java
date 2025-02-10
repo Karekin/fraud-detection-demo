@@ -32,6 +32,7 @@ import org.apache.flink.cep.CEPUtils;
 import org.apache.flink.cep.TimeBehaviour;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.jdbc.internal.options.JdbcConnectorOptions;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.*;
@@ -284,7 +285,8 @@ public class RulesEvaluator {
             RulesSource.Type rulesSourceEnumType, boolean isLocal) {
         // 创建 Flink 配置对象，用于设置运行时选项
         Configuration flinkConfig = new Configuration();
-        flinkConfig.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true); // 启用本地 Web UI 监控界面
+        // 启用本地 Web UI 监控界面
+        flinkConfig.setString(RestOptions.BIND_PORT,"8082");
 
         // 根据是否为本地执行模式，选择创建本地环境或集群环境
         StreamExecutionEnvironment env = isLocal
