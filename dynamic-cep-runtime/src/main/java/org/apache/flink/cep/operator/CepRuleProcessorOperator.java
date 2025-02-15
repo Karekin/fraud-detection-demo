@@ -258,7 +258,7 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
      * 如果规则被删除，则会清理相关的状态和资源。
      * TODO 更新完之后呢？怎么发送给SubTask（CepRuleProcessorOperator的生命周期是什么？）
      *
-     * @param evt 操作符事件
+     * @param evt 算子事件
      */
     @Override
     public void handleOperatorEvent(OperatorEvent evt) {
@@ -677,7 +677,7 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
 
     /**
      * 提供 {@link NFA} 对 {@link InternalTimerService} 的访问能力，并指示 {@link CepOperator}
-     * 是否工作在处理时间模式。每个操作符实例化一次。
+     * 是否工作在处理时间模式。每个算子实例化一次。
      */
     private class TimerServiceImpl implements TimerService {
 
@@ -695,7 +695,7 @@ public class CepRuleProcessorOperator<IN, OUT> extends AbstractStreamOperator<OU
     /**
      * {@link PatternProcessFunction.Context} 的实现类。
      *
-     * <p>此类设计为每个操作符实例化一次，提供以下功能：
+     * <p>此类设计为每个算子实例化一次，提供以下功能：
      * <ul>
      *   <li>通过 {@link InternalTimerService} 访问当前处理时间</li>
      *   <li>访问当前记录的时间戳（如果是处理时间模式则为 null）</li>

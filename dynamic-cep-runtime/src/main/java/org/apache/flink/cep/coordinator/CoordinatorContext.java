@@ -46,7 +46,7 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * <ul>
  *   <li>线程模型的强制执行 - 确保所有对协调器状态的操作均由同一线程处理。
- *   <li>提供对操作符协调器的访问和任务网关的管理。
+ *   <li>提供对算子协调器的访问和任务网关的管理。
  * </ul>
  *
  * <p>此类实现了 {@link AutoCloseable} 接口，因此可以通过 try-with-resources 语句进行自动资源管理。
@@ -67,7 +67,7 @@ public class CoordinatorContext implements AutoCloseable {
     private final CoordinatorExecutorThreadFactory coordinatorThreadFactory;
 
     @Getter
-    // 操作符协调器的上下文，用于与 Flink 框架交互
+    // 算子协调器的上下文，用于与 Flink 框架交互
     private final OperatorCoordinator.Context operatorCoordinatorContext;
 
     // 存储所有子任务的网关，以支持与子任务的通信
@@ -76,10 +76,10 @@ public class CoordinatorContext implements AutoCloseable {
     /**
      * 构造函数
      *
-     * 使用协调器线程工厂和操作符协调器上下文创建协调器上下文实例。
+     * 使用协调器线程工厂和算子协调器上下文创建协调器上下文实例。
      *
      * @param coordinatorThreadFactory 用于创建协调器线程的线程工厂
-     * @param operatorCoordinatorContext 操作符协调器的上下文
+     * @param operatorCoordinatorContext 算子协调器的上下文
      */
     public CoordinatorContext(
             CoordinatorExecutorThreadFactory coordinatorThreadFactory,
@@ -97,12 +97,12 @@ public class CoordinatorContext implements AutoCloseable {
     /**
      * 完整构造函数
      *
-     * 使用指定的调度执行器、线程工厂和操作符协调器上下文创建实例。
+     * 使用指定的调度执行器、线程工厂和算子协调器上下文创建实例。
      *
      * @param coordinatorExecutor 协调器任务的调度执行器
      * @param workerExecutor 工作任务的调度执行器
      * @param coordinatorThreadFactory 协调器线程工厂
-     * @param operatorCoordinatorContext 操作符协调器上下文
+     * @param operatorCoordinatorContext 算子协调器上下文
      */
     public CoordinatorContext(
             ScheduledExecutorService coordinatorExecutor,

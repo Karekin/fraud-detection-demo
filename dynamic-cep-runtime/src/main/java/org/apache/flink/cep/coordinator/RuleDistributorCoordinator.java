@@ -37,7 +37,7 @@ import static org.apache.flink.util.IOUtils.closeAll;
 public class RuleDistributorCoordinator implements OperatorCoordinator, RuleManager {
     private static final Logger LOG = LoggerFactory.getLogger(RuleDistributorCoordinator.class);
 
-    // 与此 RuleDistributorCoordinator 相关联的操作符名称
+    // 与此 RuleDistributorCoordinator 相关联的算子名称
     private final String operatorName;
 
     // 用于创建规则发现器的工厂类
@@ -64,10 +64,10 @@ public class RuleDistributorCoordinator implements OperatorCoordinator, RuleMana
     /**
      * 构造函数
      *
-     * 初始化规则分发协调器所需的所有依赖，包括操作符名称、队列ID、
+     * 初始化规则分发协调器所需的所有依赖，包括算子名称、队列ID、
      * 规则发现器工厂类以及协调器上下文。
      *
-     * @param operatorName      操作符的名称
+     * @param operatorName      算子的名称
      * @param ruleUpdatedQueueId 规则更新队列的ID
      * @param discovererFactory 规则发现器工厂类
      * @param coordinatorContext 协调器上下文对象
@@ -153,9 +153,9 @@ public class RuleDistributorCoordinator implements OperatorCoordinator, RuleMana
 
 
     /**
-     * 从操作符接收事件的处理方法
+     * 从算子接收事件的处理方法
      *
-     * 当前实现为空方法（No-op），即不对从操作符接收到的事件执行任何操作。
+     * 当前实现为空方法（No-op），即不对从算子接收到的事件执行任何操作。
      *
      * @param subtask       发送事件的子任务索引
      * @param attemptNumber 子任务的尝试编号

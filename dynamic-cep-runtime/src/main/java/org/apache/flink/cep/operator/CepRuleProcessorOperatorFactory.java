@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  * {@link CepRuleProcessorOperator} 的工厂类。
  *
  * <p>该工厂类负责创建并配置 CepRuleProcessorOperator，支持动态规则处理和时间行为管理。
- * 它实现了多个接口，以支持流式操作符的创建、协调器的提供，以及处理时间服务的集成。
+ * 它实现了多个接口，以支持流式算子的创建、协调器的提供，以及处理时间服务的集成。
  *
  * @param <IN> 输入数据的类型
  * @param <OUT> 输出数据的类型
@@ -77,13 +77,13 @@ public class CepRuleProcessorOperatorFactory<IN, OUT> extends AbstractStreamOper
     }
 
     /**
-     * 获取操作符协调器的提供者。 TODO 背后有什么机制？
+     * 获取算子协调器的提供者。 TODO 背后有什么机制？
      *
      * <p>该方法返回一个协调器提供者，用于管理规则的分发和协调。
      *
-     * @param operatorName 操作符名称
-     * @param operatorID 操作符唯一标识
-     * @return 操作符协调器的提供者
+     * @param operatorName 算子名称
+     * @param operatorID 算子唯一标识
+     * @return 算子协调器的提供者
      */
     @Override
     public OperatorCoordinator.Provider getCoordinatorProvider(String operatorName, OperatorID operatorID) {
@@ -91,13 +91,13 @@ public class CepRuleProcessorOperatorFactory<IN, OUT> extends AbstractStreamOper
     }
 
     /**
-     * 创建流式操作符。
+     * 创建流式算子。
      *
      * <p>该方法根据提供的参数初始化并返回一个 CepRuleProcessorOperator。
      *
-     * @param parameters 流式操作符的参数
-     * @param <T> 返回的流式操作符类型
-     * @return 已创建的流式操作符
+     * @param parameters 流式算子的参数
+     * @param <T> 返回的流式算子类型
+     * @return 已创建的流式算子
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -135,12 +135,12 @@ public class CepRuleProcessorOperatorFactory<IN, OUT> extends AbstractStreamOper
     }
 
     /**
-     * 获取流式操作符的类信息。
+     * 获取流式算子的类信息。
      *
-     * <p>返回与当前操作符对应的实现类。
+     * <p>返回与当前算子对应的实现类。
      *
      * @param classLoader 类加载器
-     * @return 流式操作符的类类型
+     * @return 流式算子的类类型
      */
     @Override
     @SuppressWarnings("rawtypes")

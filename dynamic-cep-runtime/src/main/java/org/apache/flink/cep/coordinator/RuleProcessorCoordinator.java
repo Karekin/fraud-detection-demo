@@ -37,7 +37,7 @@ import static org.apache.flink.util.IOUtils.closeAll;
 public class RuleProcessorCoordinator implements OperatorCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(RuleProcessorCoordinator.class);
 
-    // 操作符名称，用于标识该协调器关联的操作符
+    // 算子名称，用于标识该协调器关联的算子
     private final String operatorName;
 
     // 协调器上下文，提供与 Flink 框架交互的工具
@@ -58,10 +58,10 @@ public class RuleProcessorCoordinator implements OperatorCoordinator {
     /**
      * 构造方法
      *
-     * <p>初始化规则处理协调器实例，包括操作符名称、规则更新队列标识符、
+     * <p>初始化规则处理协调器实例，包括算子名称、规则更新队列标识符、
      * 以及协调器上下文。
      *
-     * @param operatorName 操作符的名称
+     * @param operatorName 算子的名称
      * @param ruleUpdatedQueueId 规则更新队列的标识符
      * @param coordinatorContext 协调器上下文对象
      */
@@ -125,9 +125,9 @@ public class RuleProcessorCoordinator implements OperatorCoordinator {
 
 
     /**
-     * 从操作符接收事件的处理方法
+     * 从算子接收事件的处理方法
      *
-     * <p>当操作符发送事件到协调器时调用。
+     * <p>当算子发送事件到协调器时调用。
      * 当前实现为空操作（No-op），即未处理接收到的事件。
      *
      * @param subtask       发送事件的子任务索引

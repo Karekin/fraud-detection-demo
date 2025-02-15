@@ -51,13 +51,13 @@ public class RuleDistributorOperatorFactory<IN> extends AbstractStreamOperatorFa
     }
 
     /**
-     * 获取操作符协调器的提供者。
+     * 获取算子协调器的提供者。
      *
      * <p>该方法返回一个协调器提供者，用于管理规则的分发和协调。
      *
-     * @param operatorName 操作符名称
-     * @param operatorID 操作符的唯一标识符
-     * @return 操作符协调器的提供者
+     * @param operatorName 算子名称
+     * @param operatorID 算子的唯一标识符
+     * @return 算子协调器的提供者
      */
     @Override
     public OperatorCoordinator.Provider getCoordinatorProvider(String operatorName, OperatorID operatorID) {
@@ -70,9 +70,9 @@ public class RuleDistributorOperatorFactory<IN> extends AbstractStreamOperatorFa
      *
      * <p>该方法根据提供的参数初始化并返回一个 RuleDistributorOperator 实例。
      *
-     * @param parameters 流式操作符的参数
-     * @param <T> 返回的流式操作符类型
-     * @return 已创建的流式操作符
+     * @param parameters 流式算子的参数
+     * @param <T> 返回的流式算子类型
+     * @return 已创建的流式算子
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -106,7 +106,7 @@ public class RuleDistributorOperatorFactory<IN> extends AbstractStreamOperatorFa
     /**
      * 获取规则分发算子的类信息。
      *
-     * <p>返回与当前操作符对应的实现类。
+     * <p>返回与当前算子对应的实现类。
      *
      * @param classLoader 类加载器
      * @return 规则分发算子的类类型

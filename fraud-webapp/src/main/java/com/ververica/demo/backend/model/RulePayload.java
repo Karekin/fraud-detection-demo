@@ -70,7 +70,7 @@ public class RulePayload {
         GREATER(">"),
         LESS("<");
 
-        final String operator; // 操作符表示
+        final String operator; // 算子表示
 
         LimitOperatorType(String operator) {
             this.operator = operator;

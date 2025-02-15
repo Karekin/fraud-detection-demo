@@ -34,7 +34,7 @@ public class Rule {
     // 聚合函数类型（如：SUM、AVG等）
     private AggregatorFunctionType aggregatorFunctionType;
 
-    // 限制操作符类型（如：>、<=等）
+    // 限制算子类型（如：>、<=等）
     private LimitOperatorType limitOperatorType;
 
     // 限制值（规则比较的阈值）
@@ -83,7 +83,7 @@ public class Rule {
                 // 大于或等于
                 return comparisonValue.compareTo(limit) >= 0;
             default:
-                throw new RuntimeException("未知的限制操作符类型: " + limitOperatorType);
+                throw new RuntimeException("未知的限制算子类型: " + limitOperatorType);
         }
     }
 
@@ -110,7 +110,7 @@ public class Rule {
     }
 
     /**
-     * 限制操作符类型，用于与值进行比较的操作符
+     * 限制算子类型，用于与值进行比较的算子
      */
     public enum LimitOperatorType {
         EQUAL("="), // 等于
@@ -120,7 +120,7 @@ public class Rule {
         GREATER(">"), // 大于
         LESS("<"); // 小于
 
-        // 操作符字符串
+        // 算子字符串
         final String operator;
 
         // 构造函数
@@ -129,9 +129,9 @@ public class Rule {
         }
 
         /**
-         * 根据字符串获取相应的操作符类型
+         * 根据字符串获取相应的算子类型
          *
-         * @param text 操作符字符串
+         * @param text 算子字符串
          * @return 对应的LimitOperatorType
          */
         public static LimitOperatorType fromString(String text) {

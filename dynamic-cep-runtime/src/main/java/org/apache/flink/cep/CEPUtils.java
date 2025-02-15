@@ -34,7 +34,7 @@ public class CEPUtils {
      * @param keyBindingEnabled 是否启用键绑定 TODO 研究
      * @param <T> 输入流的数据类型
      * @param <R> 输出流的数据类型
-     * @return 处理后的单输出流操作符
+     * @return 处理后的单输出流算子
      */
     public static <T, R> SingleOutputStreamOperator<R> dynamicUdfRules(
             DataStream<T> input,
@@ -93,7 +93,7 @@ public class CEPUtils {
      * @param keyBindingEnabled 是否启用键绑定
      * @param <T> 输入流的数据类型
      * @param <R> 输出流的数据类型
-     * @return 处理后的单输出流操作符
+     * @return 处理后的单输出流算子
      */
     public static <T, R> SingleOutputStreamOperator<R> dynamicCepRules(
             DataStream<T> input,

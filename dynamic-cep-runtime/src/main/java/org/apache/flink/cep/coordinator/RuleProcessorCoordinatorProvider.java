@@ -28,7 +28,7 @@ import org.apache.flink.runtime.operators.coordination.RecreateOnResetOperatorCo
  * <p>该类继承自 {@link RecreateOnResetOperatorCoordinator.Provider}，
  * 负责创建和提供 {@link RuleProcessorCoordinator} 的实例。
  *
- * <p>在 Flink 中，协调器（Coordinator）是用于管理和调度操作符的核心组件，
+ * <p>在 Flink 中，协调器（Coordinator）是用于管理和调度算子的核心组件，
  * 而此提供者类用于初始化协调器及其运行环境。
  */
 public class RuleProcessorCoordinatorProvider
@@ -36,7 +36,7 @@ public class RuleProcessorCoordinatorProvider
 
     private static final long serialVersionUID = 1L; // 序列化版本号，用于确保类的兼容性
 
-    // 操作符的名称
+    // 算子的名称
     private final String operatorName;
 
     // 用于存储规则事件的队列标识符
@@ -45,16 +45,16 @@ public class RuleProcessorCoordinatorProvider
     /**
      * 构造 {@link RuleProcessorCoordinatorProvider} 的实例。
      *
-     * @param operatorName 操作符的名称，用于标识协调器对应的操作符。
-     * @param operatorID   操作符的唯一标识符，与 Flink 的作业调度相关。
+     * @param operatorName 算子的名称，用于标识协调器对应的算子。
+     * @param operatorID   算子的唯一标识符，与 Flink 的作业调度相关。
      * @param ruleQueueId  用于存储规则事件的队列标识符。
      */
     public RuleProcessorCoordinatorProvider(
             String operatorName,
             OperatorID operatorID,
             String ruleQueueId) {
-        super(operatorID); // 调用父类的构造方法，设置操作符的唯一标识符
-        this.operatorName = operatorName; // 初始化操作符名称
+        super(operatorID); // 调用父类的构造方法，设置算子的唯一标识符
+        this.operatorName = operatorName; // 初始化算子名称
         this.ruleQueueId = ruleQueueId;   // 初始化规则队列标识符
     }
 
@@ -84,7 +84,7 @@ public class RuleProcessorCoordinatorProvider
 
         // 创建并返回 RuleProcessorCoordinator 实例
         return new RuleProcessorCoordinator(
-                operatorName, // 操作符名称
+                operatorName, // 算子名称
                 ruleQueueId,  // 规则队列标识符
                 coordinatorContext); // 协调器上下文
     }

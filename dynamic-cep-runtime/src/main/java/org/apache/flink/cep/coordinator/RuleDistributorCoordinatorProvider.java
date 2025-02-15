@@ -48,8 +48,8 @@ public class RuleDistributorCoordinatorProvider
     /**
      * 构造函数，初始化 {@link RuleDistributorCoordinatorProvider}。
      *
-     * @param operatorName      操作符的名称，用于标识该协调器所属的操作符
-     * @param operatorID        该协调器对应的操作符的唯一标识符
+     * @param operatorName      算子的名称，用于标识该协调器所属的算子
+     * @param operatorID        该协调器对应的算子的唯一标识符
      * @param ruleQueueId       规则队列的唯一标识符
      * @param discovererFactory 用于发现新规则的规则发现工厂
      */
@@ -58,14 +58,14 @@ public class RuleDistributorCoordinatorProvider
             OperatorID operatorID,
             String ruleQueueId,
             RuleDiscovererFactory discovererFactory) {
-        super(operatorID); // 调用父类构造函数，设置操作符ID
+        super(operatorID); // 调用父类构造函数，设置算子ID
         this.operatorName = operatorName;
         this.discovererFactory = discovererFactory;
         this.ruleQueueId = ruleQueueId;
     }
 
     /**
-     * 获取操作符协调器。
+     * 获取算子协调器。
      *
      * <p>该方法根据上下文创建并返回一个 {@link RuleDistributorCoordinator} 实例。
      * 协调器线程由自定义线程工厂创建，确保用户代码运行时类加载器正确。
@@ -89,7 +89,7 @@ public class RuleDistributorCoordinatorProvider
 
         // 创建并返回 RuleDistributorCoordinator 实例
         return new RuleDistributorCoordinator(
-                operatorName,                  // 操作符名称
+                operatorName,                  // 算子名称
                 ruleQueueId,                   // 规则队列标识
                 discovererFactory,             // 规则发现工厂
                 coordinatorContext);           // 协调器上下文

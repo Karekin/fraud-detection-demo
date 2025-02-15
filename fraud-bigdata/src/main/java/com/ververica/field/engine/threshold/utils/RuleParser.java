@@ -81,7 +81,7 @@ public class RuleParser {
         rule.setAggregateFieldName(stripBrackets(iter.next()));  // 聚合字段名称
         rule.setAggregatorFunctionType(
                 AggregatorFunctionType.valueOf(stripBrackets(iter.next()).toUpperCase()));  // 聚合函数类型
-        rule.setLimitOperatorType(LimitOperatorType.fromString(stripBrackets(iter.next())));  // 限制操作符类型
+        rule.setLimitOperatorType(LimitOperatorType.fromString(stripBrackets(iter.next())));  // 限制算子类型
         rule.setLimit(new BigDecimal(stripBrackets(iter.next())));  // 限制值
         rule.setWindowMinutes(Integer.parseInt(stripBrackets(iter.next())));  // 窗口时间（分钟）
 
